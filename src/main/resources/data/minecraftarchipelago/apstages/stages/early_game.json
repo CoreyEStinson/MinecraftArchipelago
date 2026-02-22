@@ -1,0 +1,20 @@
+{
+  "requires": {
+    "checks": ["ap:check1"]
+  },
+  "locks": {
+    "items": [
+      "minecraft:diamond_pickaxe",
+      "#minecraft:diamond_tools"
+    ]
+  },
+  "world": {
+    "gamerules": {
+      "doDaylightCycle": "false",
+      "keepInventory": "true"
+    }
+  },
+  "grants": {
+    "packages": ["minecraftarchipelago:starter_tools"]
+  }
+}
