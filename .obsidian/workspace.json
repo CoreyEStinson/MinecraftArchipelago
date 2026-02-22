@@ -1,0 +1,226 @@
+{
+  "main": {
+    "id": "228e5bf71289da52",
+    "type": "split",
+    "children": [
+      {
+        "id": "6b9bde43cdb1f90c",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "a44c25c53c8c5007",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "Ideas For Given Items.md",
+                "mode": "source",
+                "source": false
+              },
+              "icon": "lucide-file",
+              "title": "Ideas For Given Items"
+            }
+          },
+          {
+            "id": "079b265db7852a17",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "Ideas For Location Checks.md",
+                "mode": "source",
+                "source": false
+              },
+              "icon": "lucide-file",
+              "title": "Ideas For Location Checks"
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "vertical"
+  },
+  "left": {
+    "id": "c592cafe781c6415",
+    "type": "split",
+    "children": [
+      {
+        "id": "9b55c28f7ab04091",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "e34691277d3ded42",
+            "type": "leaf",
+            "state": {
+              "type": "file-explorer",
+              "state": {
+                "sortOrder": "alphabetical",
+                "autoReveal": false
+              },
+              "icon": "lucide-folder-closed",
+              "title": "Files"
+            }
+          },
+          {
+            "id": "605dd6810f0a055e",
+            "type": "leaf",
+            "state": {
+              "type": "search",
+              "state": {
+                "query": "",
+                "matchingCase": false,
+                "explainSearch": false,
+                "collapseAll": false,
+                "extraContext": false,
+                "sortOrder": "alphabetical"
+              },
+              "icon": "lucide-search",
+              "title": "Search"
+            }
+          },
+          {
+            "id": "de7a38e5745bf0e1",
+            "type": "leaf",
+            "state": {
+              "type": "bookmarks",
+              "state": {},
+              "icon": "lucide-bookmark",
+              "title": "Bookmarks"
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "horizontal",
+    "width": 300
+  },
+  "right": {
+    "id": "69bbc3ccff86818c",
+    "type": "split",
+    "children": [
+      {
+        "id": "d22df419d168feb9",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "5e33efc567ab5b0b",
+            "type": "leaf",
+            "state": {
+              "type": "backlink",
+              "state": {
+                "file": "Ideas For Given Items.md",
+                "collapseAll": false,
+                "extraContext": false,
+                "sortOrder": "alphabetical",
+                "showSearch": false,
+                "searchQuery": "",
+                "backlinkCollapsed": false,
+                "unlinkedCollapsed": true
+              },
+              "icon": "links-coming-in",
+              "title": "Backlinks for Ideas For Given Items"
+            }
+          },
+          {
+            "id": "e62c9db4ee3b0a9b",
+            "type": "leaf",
+            "state": {
+              "type": "outgoing-link",
+              "state": {
+                "file": "Ideas For Given Items.md",
+                "linksCollapsed": false,
+                "unlinkedCollapsed": true
+              },
+              "icon": "links-going-out",
+              "title": "Outgoing links from Ideas For Given Items"
+            }
+          },
+          {
+            "id": "5d603e146963fb60",
+            "type": "leaf",
+            "state": {
+              "type": "tag",
+              "state": {
+                "sortOrder": "frequency",
+                "useHierarchy": true,
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-tags",
+              "title": "Tags"
+            }
+          },
+          {
+            "id": "81eb1f3fa5b3d00b",
+            "type": "leaf",
+            "state": {
+              "type": "all-properties",
+              "state": {
+                "sortOrder": "frequency",
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-archive",
+              "title": "All properties"
+            }
+          },
+          {
+            "id": "b2e3c6899aa75246",
+            "type": "leaf",
+            "state": {
+              "type": "outline",
+              "state": {
+                "file": "Ideas For Given Items.md",
+                "followCursor": false,
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-list",
+              "title": "Outline of Ideas For Given Items"
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "horizontal",
+    "width": 300,
+    "collapsed": true
+  },
+  "left-ribbon": {
+    "hiddenItems": {
+      "switcher:Open quick switcher": false,
+      "graph:Open graph view": false,
+      "canvas:Create new canvas": false,
+      "daily-notes:Open today's daily note": false,
+      "templates:Insert template": false,
+      "command-palette:Open command palette": false,
+      "bases:Create new base": false,
+      "templater-obsidian:Templater": false
+    }
+  },
+  "active": "a44c25c53c8c5007",
+  "lastOpenFiles": [
+    "run/saves/New World/playerdata/99963b1e-252d-3ba6-8126-9071dd762e6c.dat_old",
+    "run/saves/New World/advancements/99963b1e-252d-3ba6-8126-9071dd762e6c.json",
+    "run/saves/New World/stats/99963b1e-252d-3ba6-8126-9071dd762e6c.json",
+    "run/saves/New World/playerdata/99963b1e-252d-3ba6-8126-9071dd762e6c.dat",
+    "run/saves/New World/level10953313476850139321.dat",
+    "Ideas For Victory Conditions.md",
+    "Ideas For Location Checks.md",
+    "run/saves/New World/advancements/2b32bf3c-80b5-35b3-abab-2d4e53bbbeb0.json",
+    "run/saves/New World/stats/2b32bf3c-80b5-35b3-abab-2d4e53bbbeb0.json",
+    "run/saves/New World/playerdata/2b32bf3c-80b5-35b3-abab-2d4e53bbbeb0.dat",
+    "run/logs/2026-02-21-7.log.gz",
+    "build/classes/java/main/com/minecraftarchipelago/MinecraftArchipelagoClient.class",
+    "build/classes/java/main/com/minecraftarchipelago/APSession.class",
+    "run/saves/New World/icon.png",
+    "build/resources/main/assets/minecraftarchipelago/icon.png",
+    "src/main/resources/assets/minecraftarchipelago/icon.png",
+    "run/saves/New World (1)/icon.png",
+    "build/resources/main/assets/minecraft-archipelago/icon.png",
+    "src/main/resources/assets/minecraft-archipelago/icon.png",
+    "README.md",
+    "Welcome.md",
+    "Ideas For Given Items.md"
+  ]
+}
