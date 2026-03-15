@@ -7,8 +7,7 @@ import java.util.Set;
 
 public record StageDef (
     List<String> requiredChecks,    // archipelago checks
-    Set<Identifier> lockedItemIds,  // ex. minecraft:diamond_pickaxe
-    Set<Identifier> lockItemTags,   // ex. #minecraft:diamond_tools
+    ItemStageRules itemRules,
     Map<String, String> gamerules,  // ex. "keepInventory" -> true
     List<Identifier> grantPackages  // ex. minecraftarchipelago:starter_tools
 ){}

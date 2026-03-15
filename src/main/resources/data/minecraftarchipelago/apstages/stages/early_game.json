@@ -2,10 +2,12 @@
   "requires": {
     "checks": ["ap:check1"]
   },
-  "locks": {
-    "items": [
-      "minecraft:diamond_pickaxe",
-      "#minecraft:diamond_tools"
+  "items": {
+    "lock": [
+      "#minecraft:iron_tools"
+    ],
+    "unlock": [
+      "minecraft:diamond_pickaxe"
     ]
   },
   "world": {

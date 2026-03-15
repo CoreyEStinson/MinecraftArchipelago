@@ -148,6 +148,10 @@ public final class StageCommands {
         
         boolean removed = state.reset(player.getUuid());
         source.sendFeedback(() -> Text.literal(removed ? "Reset your unlocks." : "Nothing to reset"), false);
+        
+        if (removed){
+            debugUnlock(source, "base_rules");
+        }
         return  1;
     }
     

@@ -7,6 +7,7 @@ import com.minecraftarchipelago.apstages.model.StageDef;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.registry.Registries;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
@@ -19,7 +20,31 @@ public class StageUnlockApplier
             player.sendMessage(Text.literal("Invalid stageId: " + stageID));
             return;
         }
+        
+        applyGamerules(player, stage);
         grantPackages(player, stage);
+    }
+    
+    private static void applyGamerules(ServerPlayerEntity player, StageDef stage){
+        for (var entry : stage.gamerules().entrySet()){
+            String ruleName = entry.getKey();
+            String value = entry.getValue();
+            
+            applySingleGameRule(player, ruleName, value);
+        }
+    }
+    
+    private static void applySingleGameRule(ServerPlayerEntity player, String ruleName, String value){
+        MinecraftServer server = player.getServer();
+        
+        if (server == null) return;
+        if (ruleName == null || ruleName.isBlank()) return;
+        if (value == null || value.isBlank()) return;
+        
+        String command = "gamerule " + ruleName + " " + value;
+        server.getCommandManager().executeWithPrefix(server.getCommandSource(), command);
+        
+        player.sendMessage(Text.literal("Applied gamerule: " + ruleName + "=" + value), false);
     }
 
     private static void grantPackages(ServerPlayerEntity player, StageDef stage){

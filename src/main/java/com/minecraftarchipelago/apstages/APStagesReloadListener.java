@@ -6,6 +6,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.minecraftarchipelago.MinecraftArchipelago;
 import com.minecraftarchipelago.apstages.model.ItemGrant;
+import com.minecraftarchipelago.apstages.model.ItemStageRules;
 import com.minecraftarchipelago.apstages.model.PackageDef;
 import com.minecraftarchipelago.apstages.model.StageDef;
 import net.fabricmc.fabric.api.resource.SimpleSynchronousResourceReloadListener;
@@ -100,26 +101,29 @@ public class APStagesReloadListener  implements SimpleSynchronousResourceReloadL
                     }
                 }
 
-                // locks.items
-                Set<Identifier> lockedItemIds = new HashSet<>();
-                Set<Identifier> lockedItemTags = new HashSet<>();
-
-                if (root.has("locks")){
-                    JsonObject locks = root.getAsJsonObject("locks");
-                    if (locks.has("items")){
-                        for (JsonElement el : locks.getAsJsonArray("items")){
-                            String s = el.getAsString();
-                            boolean isTag = s.startsWith("#");
-                            String raw = isTag ? s.substring((1)) : s;
-
-                            Identifier id = safeId(raw);
-                            if (id == null) continue;
-
-                            if(isTag) lockedItemTags.add(id);
-                            else lockedItemIds.add(id);
-                        }
+                // items.lcck/unlock
+                Set<Identifier> lockItemIds = new HashSet<>();
+                Set<Identifier> lockItemTags = new HashSet<>();
+                Set<Identifier> unlockItemIds = new HashSet<>();
+                Set<Identifier> unlockItemTags = new HashSet<>();
+                
+                if (root.has("items")){
+                    JsonObject items = root.getAsJsonObject("items");
+                    
+                    if (items.has("lock")){
+                        parseItemRefs(items.getAsJsonArray("lock"), lockItemIds, lockItemTags);
+                    }
+                    if (items.has("unlock")){
+                        parseItemRefs(items.getAsJsonArray("lock"), unlockItemIds, unlockItemTags);
                     }
                 }
+                
+                ItemStageRules itemRules = new ItemStageRules(
+                    lockItemIds,
+                    lockItemTags,
+                    unlockItemIds,
+                    unlockItemTags
+                );
 
                 // world.gamerules
                 Map<String, String> gamerules = new HashMap<>();
@@ -147,8 +151,7 @@ public class APStagesReloadListener  implements SimpleSynchronousResourceReloadL
 
                 StageRegistry.putStage(stageId, new StageDef(
                         requiredChecks,
-                        lockedItemIds,
-                        lockedItemTags,
+                        itemRules,
                         gamerules,
                         packages
                 ));
@@ -168,5 +171,21 @@ public class APStagesReloadListener  implements SimpleSynchronousResourceReloadL
             MinecraftArchipelago.LOGGER.error("[AP] Bad identifier in JSON: {}", raw);
         }
         return  id;
+    }
+    
+    private static void parseItemRefs(JsonArray array, Set<Identifier> itemIds, Set<Identifier> tagIds){
+        for (JsonElement el : array){
+            String raw = el.getAsString();
+            boolean isTag = raw.startsWith("#");
+            String cleaned = isTag ? raw.substring(1) : raw;
+            
+            Identifier id = Identifier.tryParse(cleaned);
+            if (id == null) continue;
+            
+            if (isTag)
+                tagIds.add(id);
+            else
+                itemIds.add(id);
+        }
     }
 }
