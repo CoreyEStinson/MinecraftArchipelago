@@ -7,7 +7,9 @@
       "#minecraft:iron_tools"
     ],
     "unlock": [
-      "minecraft:diamond_pickaxe"
+      "minecraft:diamond_pickaxe",
+      "minecraft:stone",
+      "minecraft:diamond_helmet"
     ]
   },
   "world": {

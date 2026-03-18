@@ -1,7 +1,9 @@
 {
   "items": {
     "lock": [
-      "#minecraft:diamond_tools",
+      "minecraft:diamond_pickaxe",
+      "minecraft:diamond_helmet",
+      "minecraft:stone",
       "minecraft:elytra"
     ]
   }

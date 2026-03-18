@@ -2,6 +2,7 @@ package com.minecraftarchipelago;
 
 import com.minecraftarchipelago.apstages.APStagesReloadListener;
 import com.minecraftarchipelago.apstages.command.StageCommands;
+import com.minecraftarchipelago.apstages.item.ItemStageEnforcer;
 import net.fabricmc.api.ModInitializer;
 
 import net.fabricmc.fabric.api.resource.ResourceManagerHelper;
@@ -27,5 +28,6 @@ public class MinecraftArchipelago implements ModInitializer {
 		ResourceManagerHelper.get(ResourceType.SERVER_DATA)
 			.registerReloadListener(new APStagesReloadListener());
 		StageCommands.register();
+		ItemStageEnforcer.register();
 	}
 }

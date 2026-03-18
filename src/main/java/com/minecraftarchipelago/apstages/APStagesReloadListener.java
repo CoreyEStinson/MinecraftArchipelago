@@ -114,7 +114,7 @@ public class APStagesReloadListener  implements SimpleSynchronousResourceReloadL
                         parseItemRefs(items.getAsJsonArray("lock"), lockItemIds, lockItemTags);
                     }
                     if (items.has("unlock")){
-                        parseItemRefs(items.getAsJsonArray("lock"), unlockItemIds, unlockItemTags);
+                        parseItemRefs(items.getAsJsonArray("unlock"), unlockItemIds, unlockItemTags);
                     }
                 }
                 
