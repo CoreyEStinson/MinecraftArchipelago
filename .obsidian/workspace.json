@@ -55,12 +55,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "Ideas For Location Checks.md",
+                "file": "Ideas For Victory Conditions.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "Ideas For Location Checks"
+              "title": "Ideas For Victory Conditions"
             }
           }
         ],
@@ -229,11 +229,12 @@
   },
   "active": "bb2cdff21c1f0e57",
   "lastOpenFiles": [
-    "Ideas For Given Items.md",
-    "Randomization Ideas.md",
+    "Ideas For Victory Conditions.md",
     "Ideas For Location Checks.md",
-    "Welcome.md",
     "Item Packages.md",
+    "Randomization Ideas.md",
+    "Ideas For Given Items.md",
+    "Welcome.md",
     "run/saves/New World/playerdata/5031b283-213a-3769-9d06-07f0ca40feb8.dat_old",
     "run/saves/New World/advancements/5031b283-213a-3769-9d06-07f0ca40feb8.json",
     "run/saves/New World/stats/5031b283-213a-3769-9d06-07f0ca40feb8.json",
@@ -245,7 +246,6 @@
     "build/resources/main/data/minecraftarchipelago/apstages/packages",
     "build/resources/main/data/minecraftarchipelago/apstages",
     "create a link.md",
-    "Ideas For Victory Conditions.md",
     "run/saves/New World/icon.png",
     "build/resources/main/assets/minecraftarchipelago/icon.png",
     "src/main/resources/assets/minecraftarchipelago/icon.png",

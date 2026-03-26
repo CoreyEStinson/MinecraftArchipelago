@@ -33,8 +33,20 @@ public class MinecraftArchipelagoClient implements ClientModInitializer
 
                                 // Default slot = Minecraft username
                                 String slot = source.getPlayer().getName().getString();
-                                joinAp(source, address, slot, null);
+                                joinAp(source, address, "38281", slot, null);
                                 return 0;
+                            })
+                            .then(ClientCommandManager.argument("port", StringArgumentType.string())
+                                // /archipelago join <address>
+                                .executes(ctx -> {
+                                    var source = ctx.getSource();
+                                    String address = StringArgumentType.getString(ctx, "address");
+                                    String port = StringArgumentType.getString(ctx, "port");
+                                    
+                                    // Default slot = Minecraft username
+                                    String slot = source.getPlayer().getName().getString();
+                                    joinAp(source, address, port, slot, null);
+                                    return 0;
                             })
                             .then(ClientCommandManager.argument("slot", StringArgumentType.string())
                                 // /archipelago join <address> <slot>
@@ -42,19 +54,21 @@ public class MinecraftArchipelagoClient implements ClientModInitializer
                                     var source = ctx.getSource();
                                     String address = StringArgumentType.getString(ctx, "address");
                                     String slot = StringArgumentType.getString(ctx, "slot");
-                                    joinAp(source, address, slot, null);
+                                    String port = StringArgumentType.getString(ctx, "port");
+                                    joinAp(source, address, port, slot, null);
                                     return 0;
                                 })
-                                .then(ClientCommandManager.argument("password", StringArgumentType.string())
-                                    // /archipelago join <address> <slot> <password>
-                                    .executes(ctx -> {
-                                        var source = ctx.getSource();
-                                        String address = StringArgumentType.getString(ctx, "address");
-                                        String slot = StringArgumentType.getString(ctx, "slot");
-                                        String password = StringArgumentType.getString(ctx, "password");
-                                        joinAp(source, address, slot, password);
-                                        return 0;
-                                    })
+                            .then(ClientCommandManager.argument("password", StringArgumentType.string())
+                                // /archipelago join <address> <slot> <password>
+                                .executes(ctx -> {
+                                    var source = ctx.getSource();
+                                    String address = StringArgumentType.getString(ctx, "address");
+                                    String slot = StringArgumentType.getString(ctx, "slot");
+                                    String password = StringArgumentType.getString(ctx, "password");
+                                    String port = StringArgumentType.getString(ctx, "port");
+                                    joinAp(source, address, port, slot, password);
+                                    return 0;
+                                })
                                 )
                             )
                         )
@@ -73,7 +87,7 @@ public class MinecraftArchipelagoClient implements ClientModInitializer
                         ));
                         return 0;
                     }))
-            );
+            ));
         });
         ClientSendMessageEvents.CHAT.register(message -> {
             // Only forward messages if there is an AP session connected
@@ -85,7 +99,7 @@ public class MinecraftArchipelagoClient implements ClientModInitializer
         });
     }
 
-    private static void joinAp(FabricClientCommandSource source, String address, String slot, String password) {
+    private static void joinAp(FabricClientCommandSource source, String address, String port, String slot, String password) {
         source.sendFeedback(Text.literal("Connecting to Archipelago at " + address + " as " + slot + "..."));
 
         APSession.ensureListeners();
@@ -106,7 +120,7 @@ public class MinecraftArchipelagoClient implements ClientModInitializer
         // Do not block the client thread
         new Thread(() -> {
             try {
-                APSession.CLIENT.connect("archipelago.gg:"+ address); // Defaults to port 38281 if missing
+                APSession.CLIENT.connect(address + ":" + port); // Defaults to port 38281 if missing
             } catch (URISyntaxException e){
                 source.getClient().execute(() ->
                     source.sendError(Text.literal("Bad address. Try host:port (example: localhost:38281"))
