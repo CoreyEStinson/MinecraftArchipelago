@@ -1,0 +1,7 @@
+{
+  "locations": [
+    { "advancement": "minecraft:story/mine_stone",       "location_id": 42001 },
+    { "advancement": "minecraft:story/upgrade_tools",    "location_id": 42002 },
+    { "advancement": "minecraft:story/smelt_iron",       "location_id": 42003 }
+  ]
+}
