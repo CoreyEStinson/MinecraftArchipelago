@@ -9,13 +9,38 @@ import io.github.archipelagomw.events.ReceiveItemEvent;
 import io.github.archipelagomw.events.LocationInfoEvent;
 import io.github.archipelagomw.events.PrintJSONEvent;
 import io.github.archipelagomw.events.RetrievedEvent;
+import io.github.archipelagomw.events.ConnectionResultEvent;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 
+import java.util.Map;
+
 public class APEvents {
+
+    @ArchipelagoEventListener
+    public void onConnected(ConnectionResultEvent e){
+        // e.slotData is the raw map from the APWorld's generate() method.
+        // Verify the exact field name against the Java client library.
+        SlotData data = SlotData.parse(e.getSlotData(Map.class));
+        APSession.setSlotData(data);
+
+        MinecraftArchipelagoClient.LOGGER.info(
+                "[AP] Connected. Slot data received: {}", data);
+
+        // Show confirmation in game chat
+        MinecraftClient.getInstance().execute(() -> {
+            var player = MinecraftClient.getInstance().player;
+            if (player != null){
+                player.sendMessage(Text.literal(
+                        "[AP] Connected! Goal: " + data.getAdvancementGoalPercent()
+                        + "% of advancements."
+                ));
+            }
+        });
+    }
 
     @ArchipelagoEventListener
     public void onItemReceived(ReceiveItemEvent e){
