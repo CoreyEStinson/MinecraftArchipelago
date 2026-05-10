@@ -1,0 +1,7 @@
+{
+  "items": [
+    { "ap_item_id": 50001, "stage": "minecraftarchipelago:iron_tools" },
+    { "ap_item_id": 50002, "stage": "minecraftarchipelago:nether_access" },
+    { "ap_item_id": 50003, "stage": "minecraftarchipelago:starter_kit" }
+  ]
+}

@@ -1,5 +1,6 @@
 package com.minecraftarchipelago;
 
+import com.minecraftarchipelago.apitems.APItemsReloadListener;
 import com.minecraftarchipelago.aplocations.APLocationsReloadListener;
 import com.minecraftarchipelago.apstages.APStagesReloadListener;
 import com.minecraftarchipelago.apstages.command.StageCommands;
@@ -32,5 +33,7 @@ public class MinecraftArchipelago implements ModInitializer {
 		ItemStageEnforcer.register();
 		ResourceManagerHelper.get(ResourceType.SERVER_DATA)
 				.registerReloadListener(new APLocationsReloadListener());
+		ResourceManagerHelper.get(ResourceType.SERVER_DATA)
+				.registerReloadListener(new APItemsReloadListener());
 	}
 }
