@@ -1,0 +1,5 @@
+{
+  "items": { "lock": [], "unlock": [] },
+  "world":  { "gamerules": { "fire_damage": "false" } },
+  "grants": { "packages": [] }
+}

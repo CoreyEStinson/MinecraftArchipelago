@@ -1,0 +1,5 @@
+{
+  "items": { "lock": [], "unlock": [] },
+  "world":  { "gamerules": { "mob_griefing": "false" } },
+  "grants": { "packages": [] }
+}

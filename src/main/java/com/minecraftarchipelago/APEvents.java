@@ -1,6 +1,7 @@
 package com.minecraftarchipelago;
 
 
+import com.minecraftarchipelago.apitems.APGiveItemRegistry;
 import com.minecraftarchipelago.apitems.APItemRegistry;
 import com.minecraftarchipelago.aplocations.CheckedLocationsState;
 import com.minecraftarchipelago.aplocations.VictoryCondition;
@@ -13,6 +14,9 @@ import io.github.archipelagomw.events.PrintJSONEvent;
 import io.github.archipelagomw.events.RetrievedEvent;
 import io.github.archipelagomw.events.ConnectionResultEvent;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.item.Item;
+import net.minecraft.item.ItemStack;
+import net.minecraft.registry.Registries;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.Text;
@@ -67,34 +71,62 @@ public class APEvents {
     }
 
     @ArchipelagoEventListener
-    public void onItemReceived(ReceiveItemEvent e){
-        long apItemId = e.getItemID(); // verify field name against the library
+    public void onItemReceived(ReceiveItemEvent e) {
+        Long itemId = e.getItemID();
+        if (itemId == null) {
+            MinecraftArchipelagoClient.LOGGER.warn("[AP] Received item with null ID, skipping");
+            return;
+        }
+        long apItemId = itemId;
+        MinecraftArchipelagoClient.LOGGER.info("[AP] Item received, ID: {}", apItemId);
 
-        Identifier stageId = APItemRegistry.getStageId(apItemId);
-        if (stageId == null) return; // not a stage unlock, ignore
-
-        // AP events fire on a background websocket thread.
-        // Need to get onto the server thread to safely touch
-        // player inventory, gamerules, and persistent state.
-        MinecraftClient minecraftClient = MinecraftClient.getInstance();
-        minecraftClient.execute(() -> {
-            MinecraftServer server = minecraftClient.getServer();
-            if (server == null) return; // Not in a world
+        MinecraftClient mc = MinecraftClient.getInstance();
+        mc.execute(() -> {
+            MinecraftServer server = mc.getServer();
+            if (server == null) return;
 
             server.execute(() -> {
-                if (minecraftClient.player == null) return;
-                String playerName = minecraftClient.player.getName().getString();
-
+                if (mc.player == null) return;
+                String playerName = mc.player.getName().getString();
                 ServerPlayerEntity serverPlayer =
                         server.getPlayerManager().getPlayer(playerName);
                 if (serverPlayer == null) return;
 
-                // unlock() returns false if already unlocked
-                // prevents re-applying gamerules and re-granting packages on reconnect
-                StageUnlockState state = StageUnlockState.get(server);
-                boolean added = state.unlock(serverPlayer.getUuid(), stageId);
+                // Case 1: filler give item — give directly, no stage needed
+                if (APGiveItemRegistry.isGiveItem(apItemId)) {
+                    MinecraftArchipelagoClient.LOGGER.info("[AP] → give item found");
+                    var entry = APGiveItemRegistry.getEntry(apItemId);
+                    Item item = Registries.ITEM.get(entry.itemId());
+                    ItemStack stack = new ItemStack(item, entry.count());
+                    if (!serverPlayer.getInventory().insertStack(stack)) {
+                        serverPlayer.dropItem(stack, false);
+                    }
+                    return;
+                }
 
-                if (added){
+                StageUnlockState state = StageUnlockState.get(server);
+
+                // Case 2: progressive item — find and apply the next unlocked tier
+                if (APItemRegistry.isProgressive(apItemId)) {
+                    MinecraftArchipelagoClient.LOGGER.info("[AP] → progressive item found");
+                    Identifier stageId = APItemRegistry.getNextTier(
+                            apItemId,
+                            state.getUnlocked(serverPlayer.getUuid())
+                    );
+                    if (stageId == null) return; // all tiers already unlocked
+
+                    if (state.unlock(serverPlayer.getUuid(), stageId)) {
+                        StageUnlockApplier.apply(serverPlayer, stageId);
+                    }
+                    return;
+                }
+
+                // Case 3: standard unlock or gamerule item
+                Identifier stageId = APItemRegistry.getStageId(apItemId);
+                MinecraftArchipelagoClient.LOGGER.info("[AP] → stage lookup result: {}", stageId);
+                if (stageId == null) return;
+
+                if (state.unlock(serverPlayer.getUuid(), stageId)) {
                     StageUnlockApplier.apply(serverPlayer, stageId);
                 }
             });

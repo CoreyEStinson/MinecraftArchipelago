@@ -1,10 +1,53 @@
 {
   "items": {
     "lock": [
-      "minecraft:diamond_pickaxe",
-      "minecraft:diamond_helmet",
-      "minecraft:stone",
-      "minecraft:elytra"
-    ]
-  }
+      "minecraft:stone_pickaxe", "minecraft:stone_sword",
+      "minecraft:stone_axe",     "minecraft:stone_shovel", "minecraft:stone_hoe",
+      "minecraft:iron_pickaxe",  "minecraft:iron_sword",
+      "minecraft:iron_axe",      "minecraft:iron_shovel",  "minecraft:iron_hoe",
+      "minecraft:diamond_pickaxe","minecraft:diamond_sword",
+      "minecraft:diamond_axe",   "minecraft:diamond_shovel","minecraft:diamond_hoe",
+      "minecraft:netherite_pickaxe","minecraft:netherite_sword",
+      "minecraft:netherite_axe", "minecraft:netherite_shovel","minecraft:netherite_hoe",
+      "minecraft:leather_helmet","minecraft:leather_chestplate",
+      "minecraft:leather_leggings","minecraft:leather_boots",
+      "minecraft:iron_helmet",   "minecraft:iron_chestplate",
+      "minecraft:iron_leggings", "minecraft:iron_boots",
+      "minecraft:chainmail_helmet","minecraft:chainmail_chestplate",
+      "minecraft:chainmail_leggings","minecraft:chainmail_boots",
+      "minecraft:diamond_helmet","minecraft:diamond_chestplate",
+      "minecraft:diamond_leggings","minecraft:diamond_boots",
+      "minecraft:netherite_helmet","minecraft:netherite_chestplate",
+      "minecraft:netherite_leggings","minecraft:netherite_boots",
+      "minecraft:golden_apple",  "minecraft:enchanted_golden_apple",
+      "minecraft:bone_meal",     "minecraft:elytra",
+      "minecraft:map",           "minecraft:filled_map",
+      "minecraft:shears",        "minecraft:mace",
+      "minecraft:bucket",        "minecraft:lava_bucket",
+      "minecraft:milk_bucket",   "minecraft:water_bucket",
+      "minecraft:axolotl_bucket","minecraft:powder_snow_bucket",
+      "minecraft:name_tag",      "minecraft:ominous_bottle",
+      "#minecraft:potion",        "minecraft:splash_potion",
+      "minecraft:lingering_potion",
+      "minecraft:shield",        "minecraft:spyglass",
+      "minecraft:totem_of_undying","minecraft:turtle_helmet",
+      "minecraft:flint_and_steel","minecraft:trident",
+      "minecraft:bow",           "minecraft:fishing_rod",
+      "#minecraft:boats",        "minecraft:crossbow",
+      "minecraft:ender_pearl",   "minecraft:eye_of_ender",
+      "minecraft:fire_charge",   "#minecraft:chest_boats"
+    ],
+    "unlock": []
+  },
+  "world": {
+    "gamerules": {
+      "raids":           "false",
+      "spawn_wandering_traders":"false",
+      "spawn_phantoms":  "false",
+      "warden_spawning":"false",
+      "water_source_conversion": "false",
+      "doFireTick": "false"
+    }
+  },
+  "grants": { "packages": [] }
 }

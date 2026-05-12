@@ -1,0 +1,8 @@
+{
+  "items": {
+    "lock": [],
+    "unlock": [ "minecraft:bone_meal" ]
+  },
+  "world":  { "gamerules": {} },
+  "grants": { "packages": [] }
+}

@@ -1,0 +1,8 @@
+{
+  "items": {
+    "lock": [],
+    "unlock": [ "minecraft:eye_of_ender" ]
+  },
+  "world":  { "gamerules": {} },
+  "grants": { "packages": [] }
+}

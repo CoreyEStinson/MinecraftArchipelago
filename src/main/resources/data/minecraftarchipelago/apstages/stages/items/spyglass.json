@@ -1,0 +1,8 @@
+{
+  "items": {
+    "lock": [],
+    "unlock": [ "minecraft:spyglass" ]
+  },
+  "world":  { "gamerules": {} },
+  "grants": { "packages": [] }
+}

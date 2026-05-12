@@ -1,0 +1,11 @@
+{
+  "items": {
+    "lock": [],
+    "unlock": [
+      "minecraft:netherite_helmet", "minecraft:netherite_chestplate",
+      "minecraft:netherite_leggings",     "minecraft:netherite_boots"
+    ]
+  },
+  "world":  { "gamerules": {} },
+  "grants": { "packages": [] }
+}

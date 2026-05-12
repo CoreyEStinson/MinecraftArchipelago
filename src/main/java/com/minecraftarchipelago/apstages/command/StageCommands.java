@@ -15,6 +15,7 @@ import net.minecraft.command.CommandSource;
 import net.minecraft.server.command.CommandManager;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.command.argument.IdentifierArgumentType;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 
@@ -65,11 +66,15 @@ public final class StageCommands {
             )
             .then(CommandManager.literal("debug")
                 .requires(source -> source.hasPermissionLevel(2)) // ops only
-                .then(CommandManager.literal("unlock")
-                    .then(CommandManager.argument("stage", StringArgumentType.string())
-                        .suggests(StageCommands::suggestStageIds)
-                        .executes(ctx -> debugUnlock(ctx.getSource(),
-                            StringArgumentType.getString(ctx, "stage")))))
+                    .then(CommandManager.literal("unlock")
+                            .then(CommandManager.argument("stage", IdentifierArgumentType.identifier())
+                                    .suggests(StageCommands::suggestStageIds)
+                                    .executes(ctx -> debugUnlock(
+                                            ctx.getSource(),
+                                            IdentifierArgumentType.getIdentifier(ctx, "stage")
+                                    ))
+                            )
+                    )
                 .then(CommandManager.literal("unlocked")
                     .executes(ctx -> debugUnlocked(ctx.getSource())))
                 .then(CommandManager.literal("reset")
@@ -79,23 +84,25 @@ public final class StageCommands {
     }
 
     private static CompletableFuture<Suggestions> suggestStageIds(
-        CommandContext<ServerCommandSource> ctx,
-        SuggestionsBuilder builder
+            CommandContext<ServerCommandSource> ctx,
+            SuggestionsBuilder builder
     ) {
-        Set<String> suggestions = new TreeSet<>();
-        for (Identifier id : StageRegistry.stageIds()) {
-            suggestions.add(id.getPath());
-        }
+        // Show full "namespace:path/subpath" so the argument parses correctly
+        List<String> suggestions = StageRegistry.stageIds()
+                .stream()
+                .map(Identifier::toString)
+                .sorted()
+                .toList();
 
         return CommandSource.suggestMatching(suggestions, builder);
     }
 
-    private static int debugUnlock(ServerCommandSource source, String stageString) throws CommandSyntaxException {
+    private static int debugUnlock(ServerCommandSource source, Identifier stageId)
+            throws CommandSyntaxException {
         ServerPlayerEntity player = source.getPlayerOrThrow();
 
-        Identifier stageId = resolveStageId(stageString);
-        if (stageId == null) {
-            source.sendError(Text.literal("Unknown stage id: " + stageString + " (try /stages list)"));
+        if (StageRegistry.getStage(stageId) == null) {
+            source.sendError(Text.literal("Unknown stage: " + stageId + " (try /stages list)"));
             return 0;
         }
 
@@ -103,14 +110,12 @@ public final class StageCommands {
         boolean added = state.unlock(player.getUuid(), stageId);
 
         if (added) {
-            source.sendFeedback(() -> Text.literal("Unlocked stage: " + stageId), false);
+            source.sendFeedback(() -> Text.literal("Unlocked: " + stageId), false);
             StageUnlockApplier.apply(player, stageId);
-        }
-        else {
+        } else {
             source.sendFeedback(() -> Text.literal("Already unlocked: " + stageId), false);
         }
-
-        return  1;
+        return 1;
     }
 
     private static Identifier resolveStageId(String stageString) {
@@ -150,7 +155,7 @@ public final class StageCommands {
         source.sendFeedback(() -> Text.literal(removed ? "Reset your unlocks." : "Nothing to reset"), false);
         
         if (removed){
-            debugUnlock(source, "base_rules");
+            debugUnlock(source, Identifier.of("base_rules"));
         }
         return  1;
     }

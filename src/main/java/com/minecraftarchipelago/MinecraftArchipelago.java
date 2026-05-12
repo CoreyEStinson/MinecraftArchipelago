@@ -5,10 +5,15 @@ import com.minecraftarchipelago.aplocations.APLocationsReloadListener;
 import com.minecraftarchipelago.apstages.APStagesReloadListener;
 import com.minecraftarchipelago.apstages.command.StageCommands;
 import com.minecraftarchipelago.apstages.item.ItemStageEnforcer;
+import com.minecraftarchipelago.apstages.service.StageUnlockApplier;
+import com.minecraftarchipelago.apstages.state.StageUnlockState;
 import net.fabricmc.api.ModInitializer;
 
+import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
 import net.fabricmc.fabric.api.resource.ResourceManagerHelper;
 import net.minecraft.resource.ResourceType;
+import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.util.Identifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -35,5 +40,17 @@ public class MinecraftArchipelago implements ModInitializer {
 				.registerReloadListener(new APLocationsReloadListener());
 		ResourceManagerHelper.get(ResourceType.SERVER_DATA)
 				.registerReloadListener(new APItemsReloadListener());
+
+		ServerPlayConnectionEvents.JOIN.register((handler, sender, server) -> {
+			ServerPlayerEntity player = handler.player;
+			server.execute(() -> {
+				StageUnlockState state = StageUnlockState.get(server);
+				Identifier baseRules = Identifier.of("minecraftarchipelago", "base_rules");
+
+				if (state.unlock(player.getUuid(), baseRules)){
+					StageUnlockApplier.apply(player, baseRules);
+				}
+			});
+		});
 	}
 }

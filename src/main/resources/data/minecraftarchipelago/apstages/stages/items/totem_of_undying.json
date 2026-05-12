@@ -1,0 +1,8 @@
+{
+  "items": {
+    "lock": [],
+    "unlock": [ "minecraft:totem_of_undying" ]
+  },
+  "world":  { "gamerules": {} },
+  "grants": { "packages": [] }
+}

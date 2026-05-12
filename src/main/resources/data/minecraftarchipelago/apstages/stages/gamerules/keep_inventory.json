@@ -1,0 +1,5 @@
+{
+  "items": { "lock": [], "unlock": [] },
+  "world":  { "gamerules": { "keep_inventory": "true" } },
+  "grants": { "packages": [] }
+}

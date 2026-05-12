@@ -1,0 +1,8 @@
+{
+  "items": {
+    "lock": [],
+    "unlock": [ "#minecraft:boats", "#minecraft:chest_boats" ]
+  },
+  "world":  { "gamerules": {} },
+  "grants": { "packages": [] }
+}

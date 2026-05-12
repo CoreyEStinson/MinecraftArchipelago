@@ -129,23 +129,28 @@ public class ItemStageEnforcer {
         });
     }
 
-    private static void checkArmorSlot(ServerPlayerEntity player, EquipmentSlot slot){
+    private static void checkArmorSlot(ServerPlayerEntity player, EquipmentSlot slot) {
         ItemStack equipped = player.getEquippedStack(slot);
-        if (equipped.isEmpty()){
-            return;
-        }
+        if (equipped.isEmpty()) return;
+        if (!ItemAccessHelper.isLocked(player, equipped)) return;
 
-        if (!ItemAccessHelper.isLocked(player, equipped)){
-            return;
-        }
-
-        ItemStack removed = equipped.copy();
-
+        // Clear the slot using the direct reference — no copy
         player.equipStack(slot, ItemStack.EMPTY);
 
-        boolean inserted = player.getInventory().insertStack(removed);
-        if (!inserted){
-            player.dropItem(removed, false);
+        // Insert explicitly into main inventory to prevent
+        // insertStack from routing it back to the armor slot
+        boolean inserted = false;
+        for (int i = 0; i < player.getInventory().main.size(); i++) {
+            if (player.getInventory().main.get(i).isEmpty()) {
+                player.getInventory().main.set(i, equipped);
+                player.getInventory().markDirty();
+                inserted = true;
+                break;
+            }
+        }
+
+        if (!inserted) {
+            player.dropItem(equipped, false);
         }
 
         player.sendMessage(Text.literal("That item is locked"), true);

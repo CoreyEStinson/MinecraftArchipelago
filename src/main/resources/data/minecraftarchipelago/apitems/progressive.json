@@ -1,0 +1,22 @@
+{
+  "progressive_items": [
+    {
+      "ap_item_id": 43000,
+      "stages": [
+        "minecraftarchipelago:tools/stone_tools",
+        "minecraftarchipelago:tools/iron_tools",
+        "minecraftarchipelago:tools/diamond_tools",
+        "minecraftarchipelago:tools/netherite_tools"
+      ]
+    },
+    {
+      "ap_item_id": 43001,
+      "stages": [
+        "minecraftarchipelago:armor/leather_armor",
+        "minecraftarchipelago:armor/iron_armor",
+        "minecraftarchipelago:armor/diamond_armor",
+        "minecraftarchipelago:armor/netherite_armor"
+      ]
+    }
+  ]
+}

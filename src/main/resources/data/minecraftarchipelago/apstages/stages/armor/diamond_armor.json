@@ -1,0 +1,11 @@
+{
+  "items": {
+    "lock": [],
+    "unlock": [
+      "minecraft:diamond_helmet", "minecraft:diamond_chestplate",
+      "minecraft:diamond_leggings",     "minecraft:diamond_boots"
+    ]
+  },
+  "world":  { "gamerules": {} },
+  "grants": { "packages": [] }
+}

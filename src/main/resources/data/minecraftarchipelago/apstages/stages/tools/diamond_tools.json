@@ -1,0 +1,11 @@
+{
+  "items": {
+    "lock": [],
+    "unlock": [
+      "minecraft:diamond_pickaxe", "minecraft:diamond_sword",
+      "minecraft:diamond_axe",     "minecraft:diamond_shovel", "minecraft:diamond_hoe"
+    ]
+  },
+  "world":  { "gamerules": {} },
+  "grants": { "packages": [] }
+}

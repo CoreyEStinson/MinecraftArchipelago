@@ -1,0 +1,8 @@
+{
+  "items": {
+    "lock": [],
+    "unlock": [ "minecraft:flint_and_steel", "minecraft:fire_charge" ]
+  },
+  "world":  { "gamerules": { "doFireTick": "true" } },
+  "grants": { "packages": [] }
+}

@@ -1,0 +1,8 @@
+{
+  "items": {
+    "lock": [],
+    "unlock": [ "minecraft:turtle_helmet" ]
+  },
+  "world":  { "gamerules": {} },
+  "grants": { "packages": [] }
+}

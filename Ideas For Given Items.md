@@ -1,5 +1,21 @@
 
 ## Lock item use
+Tools wood->netherite
+Golden apples
+Bone mealt
+Armor leather->netherite
+Elytra
+Map
+Shear
+Mace
+Bucket (all types)
+Name tags
+Ominous Bottle
+Potions
+Shield
+Spyglass
+Totem of Undying
+Turtle shell
 
 ## Give item packages
 [[Item Packages]]

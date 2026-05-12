@@ -1,0 +1,5 @@
+{
+  "items": { "lock": [], "unlock": [] },
+  "world":  { "gamerules": { "warden_spawning": "true" } },
+  "grants": { "packages": [] }
+}

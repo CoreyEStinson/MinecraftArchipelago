@@ -1,0 +1,8 @@
+{
+  "items": {
+    "lock": [],
+    "unlock": [ "#minecraft:potion" ]
+  },
+  "world":  { "gamerules": {} },
+  "grants": { "packages": [] }
+}

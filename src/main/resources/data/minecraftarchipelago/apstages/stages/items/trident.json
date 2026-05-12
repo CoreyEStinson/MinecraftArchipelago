@@ -1,0 +1,8 @@
+{
+  "items": {
+    "lock": [],
+    "unlock": [ "minecraft:trident" ]
+  },
+  "world":  { "gamerules": {} },
+  "grants": { "packages": [] }
+}

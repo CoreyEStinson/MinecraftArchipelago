@@ -1,0 +1,8 @@
+{
+  "items": {
+    "lock": [],
+    "unlock": [ "minecraft:ender_pearl" ]
+  },
+  "world":  { "gamerules": {} },
+  "grants": { "packages": [] }
+}

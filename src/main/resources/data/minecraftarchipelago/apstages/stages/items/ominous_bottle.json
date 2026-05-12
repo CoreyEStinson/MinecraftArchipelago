@@ -1,0 +1,8 @@
+{
+  "items": {
+    "lock": [],
+    "unlock": [ "minecraft:ominous_bottle" ]
+  },
+  "world":  { "gamerules": {} },
+  "grants": { "packages": [] }
+}

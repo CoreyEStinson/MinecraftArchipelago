@@ -105,8 +105,9 @@ public class MinecraftArchipelagoClient implements ClientModInitializer
         APSession.ensureListeners();
 
         // Configure the AP Client
-        APSession.CLIENT.setGame("Minecraft");
+        APSession.CLIENT.setGame("Minecraft Archipelago");
         APSession.CLIENT.setName(slot);
+        APSession.CLIENT.setItemsHandlingFlags(7);
 
         if (password != null && !password.isBlank()){
             APSession.CLIENT.setPassword(password);
