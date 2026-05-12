@@ -2,11 +2,14 @@ package com.minecraftarchipelago.mixin;
 
 import com.minecraftarchipelago.APSession;
 import com.minecraftarchipelago.MinecraftArchipelago;
+import com.minecraftarchipelago.aplocations.CheckedLocationsState;
 import com.minecraftarchipelago.aplocations.LocationRegistry;
+import com.minecraftarchipelago.aplocations.VictoryCondition;
 import net.minecraft.advancement.AdvancementEntry;
 import net.minecraft.advancement.AdvancementProgress;
 import net.minecraft.advancement.PlayerAdvancementTracker;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayerEntity;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -25,21 +28,29 @@ public abstract class AdvancementLocationMixin {
             String criterionName,
             CallbackInfoReturnable<Boolean> cir
     ) {
-        // grantCriterion returns false if the criterion was already done - skip
         if (!cir.getReturnValue()) return;
 
-        // Check if ALL criteria on this advancement are now complete
         AdvancementProgress progress = getProgress(advancement);
         if (!progress.isDone()) return;
 
-        // Look up the AP location ID for this advancement
         Long locationId = LocationRegistry.getLocationId(advancement.id());
         if (locationId == null) return;
 
+        // We're on the server thread here — safe to read/write server state
+        MinecraftServer server = owner.getServer();
+        if (server == null) return;
+
+        // Deduplication: returns false if already sent in a previous session
+        CheckedLocationsState state = CheckedLocationsState.get(server);
+        boolean isNew = state.checkLocation(locationId);
+        if (!isNew) return;
+
+        VictoryCondition.checkAndAward(server);
+
+        // Newly checked — dispatch to client thread to send to AP
         MinecraftClient.getInstance().execute(() -> {
             if (!APSession.CLIENT.isConnected()) return;
             APSession.CLIENT.checkLocation(locationId);
-            MinecraftArchipelago.LOGGER.info("Advancement received! {}", advancement.id());
         });
     }
 }

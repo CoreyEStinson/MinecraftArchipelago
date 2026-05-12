@@ -2,6 +2,8 @@ package com.minecraftarchipelago;
 
 
 import com.minecraftarchipelago.apitems.APItemRegistry;
+import com.minecraftarchipelago.aplocations.CheckedLocationsState;
+import com.minecraftarchipelago.aplocations.VictoryCondition;
 import com.minecraftarchipelago.apstages.service.StageUnlockApplier;
 import com.minecraftarchipelago.apstages.state.StageUnlockState;
 import io.github.archipelagomw.events.ArchipelagoEventListener;
@@ -39,6 +41,28 @@ public class APEvents {
                         + "% of advancements."
                 ));
             }
+        });
+
+        // Resend all previously checked locations so the AP server
+        // knows what we're already done. Without this, if you reconnect
+        // mid-game the server thinks you've checked nothing
+        MinecraftServer server = MinecraftClient.getInstance().getServer();
+        if (server == null) return;;
+        server.execute(() -> {
+            CheckedLocationsState state = CheckedLocationsState.get(server);
+            var allChecked = state.getAllChecked();
+
+            if (allChecked.isEmpty()) return;
+
+            MinecraftArchipelagoClient.LOGGER.info(
+                    "[AP] Resending {} previously check locations.", allChecked.size());
+
+            for (long locationId : allChecked){
+                APSession.CLIENT.checkLocation(locationId);
+            }
+
+            // If goal was already achieved in a previous session, silently resend
+            VictoryCondition.resendIfAchieved(server);
         });
     }
 
