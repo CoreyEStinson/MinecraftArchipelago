@@ -41,11 +41,12 @@
   },
   "world": {
     "gamerules": {
-      "raids":           "false",
-      "spawn_wandering_traders":"false",
-      "spawn_phantoms":  "false",
-      "warden_spawning":"false",
-      "water_source_conversion": "false",
+      "commandBlockOutput": "false",
+      "disableRaids":           "true",
+      "doTraderSpawning":"false",
+      "doInsomnia":  "false",
+      "doWardenSpawning":"false",
+      "waterSourceConversion": "false",
       "doFireTick": "false"
     }
   },

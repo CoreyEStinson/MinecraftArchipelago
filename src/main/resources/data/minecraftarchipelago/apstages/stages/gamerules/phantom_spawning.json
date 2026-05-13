@@ -1,5 +1,5 @@
 {
   "items": { "lock": [], "unlock": [] },
-  "world":  { "gamerules": { "spawn_phantoms": "true" } },
+  "world":  { "gamerules": { "doInsomnia": "true" } },
   "grants": { "packages": [] }
 }

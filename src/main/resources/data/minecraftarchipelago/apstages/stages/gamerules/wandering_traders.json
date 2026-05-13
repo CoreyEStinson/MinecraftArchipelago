@@ -1,5 +1,5 @@
 {
   "items": { "lock": [], "unlock": [] },
-  "world":  { "gamerules": { "spawn_wandering_traders": "true" } },
+  "world":  { "gamerules": { "doTraderSpawning": "true" } },
   "grants": { "packages": [] }
 }

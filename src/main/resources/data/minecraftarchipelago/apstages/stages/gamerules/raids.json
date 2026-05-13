@@ -1,5 +1,5 @@
 {
   "items": { "lock": [], "unlock": [] },
-  "world":  { "gamerules": { "raids": "true" } },
+  "world":  { "gamerules": { "disableRaids": "false" } },
   "grants": { "packages": [] }
 }

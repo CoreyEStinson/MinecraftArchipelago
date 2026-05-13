@@ -1,5 +1,5 @@
 {
   "items": { "lock": [], "unlock": [] },
-  "world":  { "gamerules": { "water_source_conversion": "true" } },
+  "world":  { "gamerules": { "waterSourceConversion": "true" } },
   "grants": { "packages": [] }
 }

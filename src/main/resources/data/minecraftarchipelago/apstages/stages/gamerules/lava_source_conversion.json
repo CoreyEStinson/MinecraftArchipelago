@@ -1,5 +1,5 @@
 {
   "items": { "lock": [], "unlock": [] },
-  "world":  { "gamerules": { "lava_source_conversion": "true" } },
+  "world":  { "gamerules": { "lavaSourceConversion": "true" } },
   "grants": { "packages": [] }
 }
