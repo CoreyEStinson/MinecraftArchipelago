@@ -10,6 +10,7 @@ import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.text.Text;
+import net.minecraft.util.Formatting;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -187,7 +188,7 @@ public class MinecraftArchipelagoClient implements ClientModInitializer
                     );
                     return;
                 }
-                try {Thread.sleep(100);} catch (InterruptedException ignored) {}
+                try { Thread.sleep(100); } catch (InterruptedException ignored) {}
             }
             source.getClient().execute(() ->
                 source.sendError((Text.literal(("Timed out waiting for socket to open. Check the address/port"))))
@@ -228,16 +229,46 @@ public class MinecraftArchipelagoClient implements ClientModInitializer
 
             for (int i = 0; i < 50; i++) {
                 if (APSession.CLIENT.isConnected()) return;
-                try { Thread.sleep(100); } catch (InterruptedException ignored) {}
+                try {
+                    Thread.sleep(100);
+                    notifyReconnectAttempt(i, 50, 5);
+                } catch (InterruptedException ignored) {}
             }
 
-            mc.execute(() -> {
-                if (mc.player != null) {
-                    mc.player.sendMessage(Text.literal(
-                            "[AP] Auto-connect timed out. Use /archipelago join to retry."
-                    ));
-                }
-            });
+            notifyReconnectFailed();
         }, "Archipelago-AutoConnect").start();
+    }
+
+    // At the start of each attempt
+    public static void notifyReconnectAttempt(int attempt, int maxAttempts, int delaySeconds) {
+        MinecraftClient mc = MinecraftClient.getInstance();
+        mc.execute(() -> {
+            var player = mc.player;
+            if (player == null) return;
+            player.sendMessage(
+                    Text.literal(String.format(
+                            "[AP] Reconnecting... (attempt %d/%d, waiting %ds)",
+                            attempt, maxAttempts, delaySeconds
+                    )).formatted(Formatting.YELLOW),
+                    true
+            );
+        });
+    }
+
+    // When all attempts are exhausted
+    public static void notifyReconnectFailed() {
+        MinecraftClient mc = MinecraftClient.getInstance();
+        mc.execute(() -> {
+            var player = mc.player;
+            if (player == null) return;
+            player.sendMessage(
+                    Text.literal("[AP] Could not reconnect automatically.")
+                            .formatted(Formatting.RED)
+            );
+            player.sendMessage(
+                    Text.literal("[AP] Use /archipelago join <address> to reconnect manually.")
+                            .formatted(Formatting.GRAY)
+            );
+        });
     }
 }
