@@ -7,12 +7,7 @@ import com.minecraftarchipelago.aplocations.CheckedLocationsState;
 import com.minecraftarchipelago.aplocations.VictoryCondition;
 import com.minecraftarchipelago.apstages.service.StageUnlockApplier;
 import com.minecraftarchipelago.apstages.state.StageUnlockState;
-import io.github.archipelagomw.events.ArchipelagoEventListener;
-import io.github.archipelagomw.events.ReceiveItemEvent;
-import io.github.archipelagomw.events.LocationInfoEvent;
-import io.github.archipelagomw.events.PrintJSONEvent;
-import io.github.archipelagomw.events.RetrievedEvent;
-import io.github.archipelagomw.events.ConnectionResultEvent;
+import io.github.archipelagomw.events.*;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
@@ -32,6 +27,11 @@ public class APEvents {
         // Verify the exact field name against the Java client library.
         SlotData data = SlotData.parse(e.getSlotData(Map.class));
         APSession.setSlotData(data);
+
+        // Enable Death Link tag on the AP connection if the option is on.
+        if (data.isDeathLinkEnabled()) {
+            APSession.CLIENT.setDeathLinkEnabled(true);
+        }
 
         MinecraftArchipelagoClient.LOGGER.info(
                 "[AP] Connected. Slot data received: {}", data);
@@ -53,10 +53,9 @@ public class APEvents {
 
             var player = MinecraftClient.getInstance().player;
             if (player != null){
-                player.sendMessage(Text.literal(
-                        "[AP] Connected! Goal: " + data.getAdvancementGoalPercent()
-                        + "% of advancements."
-                ));
+                String msg = "[AP] Connected! Goal: " + data.getAdvancementGoalPercent() + "% of advancements.";
+                if (data.isDeathLinkEnabled()) msg += " Death Link is ON";
+                player.sendMessage(Text.literal(msg));
             }
         });
 
@@ -165,5 +164,41 @@ public class APEvents {
         });
     }
 
+    @ArchipelagoEventListener
+    public void onDeathLink(DeathLinkEvent e){
+        String source = e.source;
 
+        MinecraftClient mc = MinecraftClient.getInstance();
+        mc.execute(() -> {
+            MinecraftServer server = mc.getServer();
+            if (server == null) return;
+
+            server.execute(() -> {
+                if (mc.player == null) return;
+                ServerPlayerEntity player =
+                        server.getPlayerManager().getPlayer(mc.player.getName().getString());
+                if (player == null || player.isDead()) return;
+
+                // Flag to prevent the death from triggering another send
+                DeathLinkHandler.setRecievingDeathLink(true);
+
+                // Kill the player with void damage
+                player.damage(
+                        player.getDamageSources().outOfWorld(),
+                        Float.MAX_VALUE
+                );
+
+                DeathLinkHandler.setRecievingDeathLink(false);
+
+                // Show who send the death
+                mc.execute(() -> {
+                    if (mc.player != null) {
+                        mc.player.sendMessage(
+                                Text.literal("[AP] Death Link received. Sent by " + source)
+                        );
+                    }
+                });
+            });
+        });
+    }
 }

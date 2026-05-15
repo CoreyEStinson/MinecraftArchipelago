@@ -1,15 +1,16 @@
 {
-	"required": true,
-	"package": "com.minecraftarchipelago.mixin",
-	"compatibilityLevel": "JAVA_21",
-	"mixins": [
-		"AdvancementLocationMixin",
-		"ExampleMixin"
-	],
-	"injectors": {
-		"defaultRequire": 1
-	},
-	"overwrites": {
-		"requireAnnotations": true
+  "required": true,
+  "package": "com.minecraftarchipelago.mixin",
+  "compatibilityLevel": "JAVA_21",
+  "mixins": [
+    "AdvancementLocationMixin",
+    "ExampleMixin",
+    "PlayerDeathMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  },
+  "overwrites": {
+    "requireAnnotations": true
 	}
 }
