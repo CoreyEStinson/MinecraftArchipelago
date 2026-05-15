@@ -38,6 +38,19 @@ public class APEvents {
 
         // Show confirmation in game chat
         MinecraftClient.getInstance().execute(() -> {
+            // Persist credentials for auto-reconnect on next world load
+            MinecraftServer server = MinecraftClient.getInstance().getServer();
+            if (server != null) {
+                server.execute(() -> {
+                    APConnectionState.get(server).save(
+                            APSession.getPendingHost(),
+                            APSession.getPendingPort(),
+                            APSession.getPendingSlot(),
+                            APSession.getPendingPassword()
+                    );
+                });
+            }
+
             var player = MinecraftClient.getInstance().player;
             if (player != null){
                 player.sendMessage(Text.literal(

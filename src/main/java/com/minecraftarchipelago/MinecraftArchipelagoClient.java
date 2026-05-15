@@ -6,6 +6,9 @@ import net.fabricmc.fabric.api.client.command.v2.ClientCommandManager;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.fabricmc.fabric.api.client.message.v1.ClientSendMessageEvents;
+import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
+import net.minecraft.client.MinecraftClient;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.text.Text;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -76,7 +79,13 @@ public class MinecraftArchipelagoClient implements ClientModInitializer
                     )
                     .then(ClientCommandManager.literal("leave").executes(ctx -> {
                         APSession.CLIENT.close();
+                        APSession.clearSlotData();
                         ctx.getSource().sendFeedback(Text.literal("Disconnected from Archipelago."));
+
+                        MinecraftServer server = ctx.getSource().getClient().getServer();
+                        if (server != null){
+                            server.execute(() -> APConnectionState.get(server).clear());
+                        }
                         return 0;
                     }))
                     .then(ClientCommandManager.literal("status").executes(ctx -> {
@@ -97,9 +106,43 @@ public class MinecraftArchipelagoClient implements ClientModInitializer
 
 
         });
+        ClientPlayConnectionEvents.JOIN.register((handler, sender, client) -> {
+            // Runs on the client thread when a world is loaded
+            MinecraftServer server = client.getServer();
+            if (server == null) return; // Not a singleplayer world
+
+            server.execute(() -> {
+                APConnectionState connState = APConnectionState.get(server);
+                if (!connState.hasSavedConnection()) return;
+                if (APSession.CLIENT.isConnected()) return; // Already connected
+
+                String host = connState.getHost();
+                String port = connState.getPort();
+                String slot = connState.getSlot();
+                String password = connState.getPassword();
+
+                client.execute(() -> {
+                    if (client.player != null) {
+                        client.player.sendMessage(Text.literal(
+                                "[AP] Auto-connecting to " + host + " as " + slot + "..."
+                        ));
+                    }
+                    autoReconnect(host, port, slot, password, client);
+                });
+            });
+        });
+        ClientPlayConnectionEvents.DISCONNECT.register((handler, client) -> {
+            if (APSession.CLIENT.isConnected()){
+                APSession.CLIENT.close();
+            }
+            APSession.clearSlotData();
+        });
     }
 
     private static void joinAp(FabricClientCommandSource source, String address, String port, String slot, String password) {
+        // Store credentials so onConected can persist them
+        APSession.setPendingCredentials(address, port, slot, password);
+
         source.sendFeedback(Text.literal("Connecting to Archipelago at " + address + " as " + slot + "..."));
 
         APSession.ensureListeners();
@@ -150,5 +193,51 @@ public class MinecraftArchipelagoClient implements ClientModInitializer
                 source.sendError((Text.literal(("Timed out waiting for socket to open. Check the address/port"))))
             );
         }, "Archipelago-Join").start();
+    }
+
+    private static void autoReconnect(
+            String host, String port, String slot, String password, MinecraftClient mc
+    ) {
+        APSession.setPendingCredentials(host, port, slot, password);
+        APSession.ensureListeners();
+        APSession.CLIENT.setGame("Minecraft Archipelago");
+        APSession.CLIENT.setName(slot);
+        APSession.CLIENT.setItemsHandlingFlags(7);
+
+        if (password != null && !password.isBlank()) {
+            APSession.CLIENT.setPassword(password);
+        }
+
+        if (APSession.CLIENT.isConnected()) {
+            APSession.CLIENT.close();
+        }
+
+        new Thread(() -> {
+            try {
+                APSession.CLIENT.connect(host + ":" + port);
+            } catch (Exception e){
+                mc.execute(() -> {
+                    if (mc.player != null) {
+                        mc.player.sendMessage(Text.literal(
+                                "[AP] Auto-connect failed: " + e.getMessage()
+                        ));
+                    }
+                });
+                return;
+            }
+
+            for (int i = 0; i < 50; i++) {
+                if (APSession.CLIENT.isConnected()) return;
+                try { Thread.sleep(100); } catch (InterruptedException ignored) {}
+            }
+
+            mc.execute(() -> {
+                if (mc.player != null) {
+                    mc.player.sendMessage(Text.literal(
+                            "[AP] Auto-connect timed out. Use /archipelago join to retry."
+                    ));
+                }
+            });
+        }, "Archipelago-AutoConnect").start();
     }
 }

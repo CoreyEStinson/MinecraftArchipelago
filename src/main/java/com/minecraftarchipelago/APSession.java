@@ -23,6 +23,25 @@ public final class APSession {
         return slotData != null;
     }
 
+    private static String pendingHost = null;
+    private static String pendingPort = null;
+    private static String pendingSlot = null;
+    private static String pendingPassword = null;
+
+    public static void setPendingCredentials(
+            String host, String port, String slot, String password
+    ) {
+        pendingHost = host;
+        pendingPort = port;
+        pendingSlot = slot;
+        pendingPassword = password;
+    }
+
+    public static String getPendingHost() { return pendingHost; }
+    public static String getPendingPort() { return pendingPort; }
+    public static String getPendingSlot() { return pendingSlot; }
+    public static String getPendingPassword() { return pendingPassword; }
+
     public static void ensureListeners() {
         if (listenerRegistered) return;
         CLIENT.getEventManager().registerListener(new APEvents());
