@@ -9,6 +9,9 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.registry.Registries;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.sound.SoundCategory;
+import net.minecraft.sound.SoundEvent;
+import net.minecraft.sound.SoundEvents;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 
@@ -23,6 +26,8 @@ public class StageUnlockApplier
         
         applyGamerules(player, stage);
         grantPackages(player, stage);
+
+        player.playSoundToPlayer(SoundEvents.ENTITY_EXPERIENCE_ORB_PICKUP, SoundCategory.PLAYERS, 1.0f, 1.0f);
     }
     
     private static void applyGamerules(ServerPlayerEntity player, StageDef stage){

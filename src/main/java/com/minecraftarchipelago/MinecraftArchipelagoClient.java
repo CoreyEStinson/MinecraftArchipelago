@@ -245,6 +245,7 @@ public class MinecraftArchipelagoClient implements ClientModInitializer
         mc.execute(() -> {
             var player = mc.player;
             if (player == null) return;
+            if (attempt == 0) return;
             player.sendMessage(
                     Text.literal(String.format(
                             "[AP] Reconnecting... (attempt %d/%d, waiting %ds)",

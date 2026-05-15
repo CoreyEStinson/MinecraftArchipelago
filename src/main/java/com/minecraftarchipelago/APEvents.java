@@ -14,6 +14,8 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.registry.Registries;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.sound.SoundCategory;
+import net.minecraft.sound.SoundEvents;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 
@@ -113,6 +115,9 @@ public class APEvents {
                     if (!serverPlayer.getInventory().insertStack(stack)) {
                         serverPlayer.dropItem(stack, false);
                     }
+
+                    serverPlayer.playSoundToPlayer(SoundEvents.ENTITY_EXPERIENCE_ORB_PICKUP, SoundCategory.PLAYERS, 1.0f, 1.0f);
+
                     return;
                 }
 
