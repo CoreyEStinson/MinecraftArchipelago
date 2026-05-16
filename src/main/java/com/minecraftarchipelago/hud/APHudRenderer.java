@@ -1,17 +1,25 @@
 package com.minecraftarchipelago.hud;
 
+import com.google.gson.Gson;
+import com.google.gson.JsonObject;
 import com.minecraftarchipelago.APSession;
+import com.minecraftarchipelago.MinecraftArchipelago;
 import com.minecraftarchipelago.aplocations.CheckedLocationsState;
 import com.minecraftarchipelago.aplocations.LocationRegistry;
 import com.minecraftarchipelago.apstages.state.StageUnlockState;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.rendering.v1.HudRenderCallback;
+import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.render.RenderTickCounter;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayerEntity;
+import org.lwjgl.glfw.GLFW;
+
+import java.nio.file.Files;
+import java.nio.file.Path;
 
 public final class APHudRenderer {
 
@@ -35,7 +43,18 @@ public final class APHudRenderer {
     private static final int COL_BAR_FILL = 0xFF33AA55;
     private static final int COL_BAR_WIN = 0xFFFFAA00;
 
+    // Saved position
+    private static int savedX = -1;
+    private static int savedY = -1;
+
+    // Drag state
+    private static boolean isDragging = false;
+    private static int dragOffsetX = 0;
+    private static int dragOffsetY = 0;
+    private static boolean prevMouseBtn = false;
+
     public static void register() {
+        loadPosition();
         ClientTickEvents.END_CLIENT_TICK.register(APHudRenderer::updateState);
         HudRenderCallback.EVENT.register(APHudRenderer::render);
     }
@@ -76,14 +95,27 @@ public final class APHudRenderer {
 
         TextRenderer tr = client.textRenderer;
         int sw = client.getWindow().getScaledWidth();
-
+        int sh = client.getWindow().getScaledHeight();
         int height = computeHeight();
 
-        int x = sw - PANEL_WIDTH - MARGIN;
-        int y = MARGIN;
+        // Resolve saved/default position, then appy drag for this frame
+        int[] pos = resolvedPosition(sw, sh, height);
+        pos = handleDrag(client, pos[0], pos[1], height);
+        int x = pos[0];
+        int y = pos[1];
 
-        // Border + background
-        ctx.fill(x - 1, y - 1, x + PANEL_WIDTH + 1, y + height + 1, COL_BORDER);
+        // Detect Alt for visual hints
+        long handle = client.getWindow().getHandle();
+        boolean altHeld =
+                GLFW.glfwGetKey(handle, GLFW.GLFW_KEY_LEFT_ALT) == GLFW.GLFW_PRESS ||
+                GLFW.glfwGetKey(handle, GLFW.GLFW_KEY_RIGHT_ALT) == GLFW.GLFW_PRESS;
+
+        // Border changes colour to signal drag-ready or dragging
+        int borderColor = isDragging ? 0xFFFFAA00       // gold while dragging
+                        : altHeld    ? 0xFF4488AA       // blue when Alt held
+                        : COL_BORDER;                   // normal
+
+        ctx.fill(x - 1, y - 1, x + PANEL_WIDTH + 1, y + height + 1, borderColor);
         ctx.fill(x, y, x + PANEL_WIDTH, y + height, COL_BG);
 
         int cx = x + PAD;
@@ -193,6 +225,97 @@ public final class APHudRenderer {
         h += 5;         // separator
         h += LINE;      // stages line
         return h;
+    }
+
+    // Position persistence
+    private static void loadPosition() {
+        Path path = FabricLoader.getInstance().getConfigDir()
+                .resolve("minecraftarchipelago_hud.json");
+        if(!Files.exists(path)) return;
+        try {
+            JsonObject obj = new Gson().fromJson(Files.readString(path), JsonObject.class);
+            if (obj.has("x")) savedX = obj.get("x").getAsInt();
+            if (obj.has("y")) savedY = obj.get("y").getAsInt();
+        } catch (Exception e) {
+            MinecraftArchipelago.LOGGER.warn("[AP HUD] Could not load position: {}", e.getMessage());
+        }
+    }
+
+    private static void savePosition(int x, int y) {
+        Path path = FabricLoader.getInstance().getConfigDir()
+                .resolve("minecraftarchipelago_hud.json");
+        try {
+            JsonObject obj = new JsonObject();
+            obj.addProperty("x", x);
+            obj.addProperty("y", y);
+            Files.writeString(path, new Gson().toJson(obj));
+        } catch (Exception e) {
+            MinecraftArchipelago.LOGGER.warn("[AP HUD] Could not save position: {}", e.getMessage());
+        }
+    }
+
+    // Position resolution
+    /**
+     * Returns [x, y] for the panel this frame.
+     * Falls back to top-right if no saved position.
+     * Clamps to screen so window resizes can't push it off-screen.
+     */
+    private static int[] resolvedPosition(int sw, int sh, int panelHeight) {
+        int x = (savedX >= 0) ? savedX : sw - PANEL_WIDTH - MARGIN;
+        int y = (savedY >= 0) ? savedY : MARGIN;
+        x = Math.max(0, Math.min(x, sw - PANEL_WIDTH));
+        y = Math.max(0, Math.min(y, sh - panelHeight));
+        return new int[]{x, y};
+    }
+
+    // Drag handler
+    /**
+     * Call at the start of render() each frame.
+     * Alt + left-click-drag repositions the panel.
+     * Saves to disk when drag ends.
+     * Returns updated [x, y] for this frame.
+     */
+    private static int[] handleDrag(MinecraftClient client, int px, int py, int panelHeight) {
+
+        long handle = client.getWindow().getHandle();
+
+        boolean mouseDown = GLFW.glfwGetMouseButton(handle, GLFW.GLFW_MOUSE_BUTTON_LEFT)
+                == GLFW.GLFW_PRESS;
+        boolean altHeld =
+                GLFW.glfwGetKey(handle, GLFW.GLFW_KEY_LEFT_ALT) == GLFW.GLFW_PRESS ||
+                GLFW.glfwGetKey(handle, GLFW.GLFW_KEY_RIGHT_ALT) == GLFW.GLFW_PRESS;
+
+        int sw = client.getWindow().getScaledWidth();
+        int sh = client.getWindow().getScaledHeight();
+        int mx = (int)(client.mouse.getX() * sw / client.getWindow().getWidth());
+        int my = (int)(client.mouse.getY() * sh / client.getWindow().getHeight());
+
+        // Start drag: Alt held, mouse just pressed, cursor is inside panel
+        if (mouseDown && !prevMouseBtn && altHeld) {
+            if (mx >= px && mx <= px + PANEL_WIDTH &&
+                my >= py && my <= py + panelHeight) {
+                isDragging = true;
+                dragOffsetX = mx - px;
+                dragOffsetY = my - py;
+            }
+        }
+
+        // Update position while dragging
+        if (isDragging && mouseDown) {
+            px = Math.max(0, Math.min(mx - dragOffsetX, sw - PANEL_WIDTH));
+            py = Math.max(0, Math.min(my - dragOffsetY, sh - panelHeight));
+            savedX = px;
+            savedY = py;
+        }
+
+        // Mouse released - end drag and persist position
+        if (!mouseDown && prevMouseBtn && isDragging) {
+            isDragging = false;
+            savePosition(px, py);
+        }
+
+        prevMouseBtn = mouseDown;
+        return new int[]{px, py};
     }
 
     private APHudRenderer() {}
