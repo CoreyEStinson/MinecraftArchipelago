@@ -1,16 +1,23 @@
 package com.minecraftarchipelago;
 
+import com.minecraftarchipelago.hud.APHudRenderer;
+import com.minecraftarchipelago.hud.APHudState;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandManager;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
+import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
+import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
 import net.fabricmc.fabric.api.client.message.v1.ClientSendMessageEvents;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.option.KeyBinding;
+import net.minecraft.client.util.InputUtil;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
+import org.lwjgl.glfw.GLFW;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -25,6 +32,24 @@ public class MinecraftArchipelagoClient implements ClientModInitializer
     @Override
     public void onInitializeClient()
     {
+
+        APHudRenderer.register();
+
+        // Register the toggle keybind (default: H, changeable in Controls)
+        KeyBinding hudToggleKey = KeyBindingHelper.registerKeyBinding(new KeyBinding(
+                "Toggle Hud",
+                InputUtil.Type.KEYSYM,
+                GLFW.GLFW_KEY_H,
+                "Archipelago"
+        ));
+
+        // Check the key every tick and toggle visibility
+        ClientTickEvents.END_CLIENT_TICK.register(client -> {
+            while (hudToggleKey.wasPressed()) {
+                APHudState.visible = !APHudState.visible;
+            }
+        });
+
         ClientCommandRegistrationCallback.EVENT.register((dispatcher, registryAccess) -> {
             dispatcher.register(
                 ClientCommandManager.literal("archipelago")
@@ -151,6 +176,7 @@ public class MinecraftArchipelagoClient implements ClientModInitializer
         // Configure the AP Client
         APSession.CLIENT.setGame("Minecraft Archipelago");
         APSession.CLIENT.setName(slot);
+        APSession.slotName = slot;
         APSession.CLIENT.setItemsHandlingFlags(7);
 
         if (password != null && !password.isBlank()){
@@ -203,6 +229,7 @@ public class MinecraftArchipelagoClient implements ClientModInitializer
         APSession.ensureListeners();
         APSession.CLIENT.setGame("Minecraft Archipelago");
         APSession.CLIENT.setName(slot);
+        APSession.slotName = slot;
         APSession.CLIENT.setItemsHandlingFlags(7);
 
         if (password != null && !password.isBlank()) {

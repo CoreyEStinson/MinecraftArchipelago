@@ -7,6 +7,8 @@ public final class APSession {
     // Null until a successful connection + slot data recived
     private static SlotData slotData = null;
 
+    public static String slotName = "-";
+
     public static SlotData getSlotData(){
         return  slotData;
     }
