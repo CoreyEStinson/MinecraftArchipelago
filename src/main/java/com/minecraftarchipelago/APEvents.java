@@ -87,6 +87,8 @@ public class APEvents {
     @ArchipelagoEventListener
     public void onItemReceived(ReceiveItemEvent e) {
         Long itemId = e.getItemID();
+        int itemIndex = (int) e.getIndex();
+
         if (itemId == null) {
             MinecraftArchipelagoClient.LOGGER.warn("[AP] Received item with null ID, skipping");
             return;
@@ -105,6 +107,12 @@ public class APEvents {
                 ServerPlayerEntity serverPlayer =
                         server.getPlayerManager().getPlayer(playerName);
                 if (serverPlayer == null) return;
+
+                CheckedLocationsState checkedState = CheckedLocationsState.get(server);
+                if (!checkedState.isNewItem(itemIndex)) {
+                    MinecraftArchipelagoClient.LOGGER.info("[AP] → index {} already processed, skipping", itemIndex);
+                    return;
+                }
 
                 // Case 1: filler give item — give directly, no stage needed
                 if (APGiveItemRegistry.isGiveItem(apItemId)) {
@@ -185,7 +193,7 @@ public class APEvents {
                 if (player == null || player.isDead()) return;
 
                 // Flag to prevent the death from triggering another send
-                DeathLinkHandler.setRecievingDeathLink(true);
+                DeathLinkHandler.setReceivingDeathLink(true);
 
                 // Kill the player with void damage
                 player.damage(
@@ -193,7 +201,7 @@ public class APEvents {
                         Float.MAX_VALUE
                 );
 
-                DeathLinkHandler.setRecievingDeathLink(false);
+                DeathLinkHandler.setReceivingDeathLink(false);
 
                 // Show who send the death
                 mc.execute(() -> {

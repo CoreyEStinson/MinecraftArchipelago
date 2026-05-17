@@ -4,11 +4,11 @@ public final class DeathLinkHandler {
 
     // True while the player is dying FROM a received Death Link
     // The mixin checks this to avoid re-sending
-    private static boolean recievingDeathLink = false;
+    private static boolean receivingDeathLink = false;
 
-    public static boolean isRecievingDeathLink() { return recievingDeathLink; }
+    public static boolean isReceivingDeathLink() { return receivingDeathLink; }
 
-    public static void setRecievingDeathLink(boolean value) { recievingDeathLink = value; }
+    public static void setReceivingDeathLink(boolean value) { receivingDeathLink = value; }
 
     private DeathLinkHandler() {}
 }

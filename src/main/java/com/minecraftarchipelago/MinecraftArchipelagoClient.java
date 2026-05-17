@@ -32,7 +32,6 @@ public class MinecraftArchipelagoClient implements ClientModInitializer
     @Override
     public void onInitializeClient()
     {
-
         APHudRenderer.register();
 
         // Register the toggle keybind (default: H, changeable in Controls)
@@ -47,6 +46,7 @@ public class MinecraftArchipelagoClient implements ClientModInitializer
         ClientTickEvents.END_CLIENT_TICK.register(client -> {
             while (hudToggleKey.wasPressed()) {
                 APHudState.visible = !APHudState.visible;
+                APHudRenderer.saveConfig();
             }
         });
 

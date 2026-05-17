@@ -26,6 +26,7 @@ public final class CheckedLocationsState extends PersistentState{
 
     private final Set<Long> checkedIds = new HashSet<>();
     private boolean goalAchieved = false;
+    private int lastReceivedItemIndex = -1;
 
     public static CheckedLocationsState get(MinecraftServer server){
         ServerWorld overworld = server.getOverworld();
@@ -43,6 +44,9 @@ public final class CheckedLocationsState extends PersistentState{
             state.checkedIds.add(id);
         }
         state.goalAchieved = nbt.getBoolean("goal_achieved");
+        state.lastReceivedItemIndex = nbt.contains("lastReceivedItemIndex")
+                ? nbt.getInt("lastReceivedItemIndex")
+                : -1;
         return state;
     }
 
@@ -56,6 +60,7 @@ public final class CheckedLocationsState extends PersistentState{
                 .toArray();
         nbt.putLongArray("checked", array);
         nbt.putBoolean("goal_achieved", goalAchieved);
+        nbt.putInt("lastReceivedItemIndex", lastReceivedItemIndex);
         return nbt;
     }
 
@@ -91,5 +96,12 @@ public final class CheckedLocationsState extends PersistentState{
 
     public boolean isGoalAchieved() {
         return goalAchieved;
+    }
+
+    public boolean isNewItem(int index) {
+        if (index <= lastReceivedItemIndex) return false;
+        lastReceivedItemIndex = index;
+        markDirty();
+        return true;
     }
 }

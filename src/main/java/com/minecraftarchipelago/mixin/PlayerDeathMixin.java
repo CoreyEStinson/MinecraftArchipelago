@@ -16,7 +16,7 @@ public class PlayerDeathMixin {
     @Inject(method = "onDeath", at = @At("HEAD"))
     private void onPlayerDeath(DamageSource source, CallbackInfo ci){
         // Don't send if we're dying FROM a received Death Link
-        if (DeathLinkHandler.isRecievingDeathLink()) return;
+        if (DeathLinkHandler.isReceivingDeathLink()) return;
 
         if( !APSession.CLIENT.isConnected()) return;
         if (!APSession.hasSlotData()) return;

@@ -90,6 +90,7 @@ public final class APHudRenderer {
 
     private static void render(DrawContext ctx, RenderTickCounter delta) {
         if (!APHudState.visible) return;
+        if (MinecraftClient.getInstance().world == null) return;
 
         MinecraftClient client = MinecraftClient.getInstance();
 
@@ -236,21 +237,23 @@ public final class APHudRenderer {
             JsonObject obj = new Gson().fromJson(Files.readString(path), JsonObject.class);
             if (obj.has("x")) savedX = obj.get("x").getAsInt();
             if (obj.has("y")) savedY = obj.get("y").getAsInt();
+            if (obj.has("visible")) APHudState.visible = obj.get("visible").getAsBoolean();
         } catch (Exception e) {
             MinecraftArchipelago.LOGGER.warn("[AP HUD] Could not load position: {}", e.getMessage());
         }
     }
 
-    private static void savePosition(int x, int y) {
+    public static void saveConfig() {
         Path path = FabricLoader.getInstance().getConfigDir()
                 .resolve("minecraftarchipelago_hud.json");
         try {
             JsonObject obj = new JsonObject();
-            obj.addProperty("x", x);
-            obj.addProperty("y", y);
+            if (savedX >= 0) obj.addProperty("x", savedX);
+            if (savedY >= 0) obj.addProperty("y", savedY);
+            obj.addProperty("visible", APHudState.visible);
             Files.writeString(path, new Gson().toJson(obj));
         } catch (Exception e) {
-            MinecraftArchipelago.LOGGER.warn("[AP HUD] Could not save position: {}", e.getMessage());
+            MinecraftArchipelago.LOGGER.warn("[AP HUD] Could not save config: {}", e.getMessage());
         }
     }
 
@@ -311,7 +314,7 @@ public final class APHudRenderer {
         // Mouse released - end drag and persist position
         if (!mouseDown && prevMouseBtn && isDragging) {
             isDragging = false;
-            savePosition(px, py);
+            saveConfig();
         }
 
         prevMouseBtn = mouseDown;

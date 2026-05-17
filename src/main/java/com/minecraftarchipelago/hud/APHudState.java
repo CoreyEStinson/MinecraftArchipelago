@@ -3,7 +3,7 @@ package com.minecraftarchipelago.hud;
 public final class APHudState {
 
     // Toggle - press the keybinding to flip this
-    public static boolean visible = false;
+    public static boolean visible = true;
 
     // Connection
     public static boolean connected = false;
