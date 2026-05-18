@@ -125,10 +125,9 @@ public class MinecraftArchipelagoClient implements ClientModInitializer
             ));
         });
         ClientSendMessageEvents.CHAT.register(message -> {
-            // Only forward messages if there is an AP session connected
-            if (APSession.CLIENT == null) return;
-
-            var result = APSession.CLIENT.sendChat(message); // Sends to AP chat
+            // Only forward messages when AP is connected.
+            if (!APSession.CLIENT.isConnected()) return;
+            APSession.CLIENT.sendChat(message); // Sends to AP chat
 
 
         });
@@ -274,10 +273,8 @@ public class MinecraftArchipelagoClient implements ClientModInitializer
             if (player == null) return;
             if (attempt == 0) return;
             player.sendMessage(
-                    Text.literal(String.format(
-                            "[AP] Reconnecting... (attempt %d/%d, waiting %ds)",
-                            attempt, maxAttempts, delaySeconds
-                    )).formatted(Formatting.YELLOW),
+                    Text.literal("[AP] Reconnecting... (attempt " + attempt + "/" + maxAttempts
+                            + ", waiting " + delaySeconds + "s)").formatted(Formatting.YELLOW),
                     true
             );
         });

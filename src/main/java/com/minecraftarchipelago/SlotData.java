@@ -2,7 +2,6 @@ package com.minecraftarchipelago;
 
 import java.util.Map;
 
-import static com.mojang.brigadier.arguments.BoolArgumentType.getBool;
 
 public final class SlotData {
 
@@ -10,16 +9,19 @@ public final class SlotData {
     // Default to 70%
     private final int advancementGoalPercent;
     private final boolean deathLink;
+    private final int lootCheckCount;
 
-    private SlotData(int advancementGoalPercent, boolean deathLink){
+    private SlotData(int advancementGoalPercent, boolean deathLink, int lootCheckCount){
         this.advancementGoalPercent = advancementGoalPercent;
         this.deathLink = deathLink;
+        this.lootCheckCount = lootCheckCount;
     }
 
     public int getAdvancementGoalPercent(){
         return advancementGoalPercent;
     }
     public boolean isDeathLinkEnabled() { return deathLink; }
+    public int getLootCheckCount() { return lootCheckCount; }
 
     // Called with whatever map the AP server sends as slot_data
     // Values come from JSON so they may be Int, Double, Long, ect
@@ -27,7 +29,8 @@ public final class SlotData {
         int goal = getInt(raw, "advancement_goal", 70);
         goal = Math.max(1, Math.min(100, goal)); // clamp to 1-100
         boolean deathLink = getBool(raw, "death_link", false);
-        return new SlotData(goal, deathLink);
+        int lootCheckCount = getInt(raw, "loot_check_count", 0);
+        return new SlotData(goal, deathLink, lootCheckCount);
     }
 
     private static int getInt(Map<String, Object> raw, String key, int defaultValue){
@@ -45,6 +48,6 @@ public final class SlotData {
 
     @Override
     public String toString(){
-        return "SlotData{advancementGoal=" + advancementGoalPercent + "$}";
+        return "SlotData{advancementGoal=" + advancementGoalPercent + "%, lootCheckCount=" + lootCheckCount + "}";
     }
 }

@@ -5,6 +5,7 @@
   "mixins": [
     "AdvancementLocationMixin",
     "ExampleMixin",
+    "ItemPickupMixin",
     "PlayerDeathMixin"
   ],
   "injectors": {
