@@ -7,8 +7,6 @@ import com.minecraftarchipelago.apstages.command.StageCommands;
 import com.minecraftarchipelago.apstages.item.ItemStageEnforcer;
 import com.minecraftarchipelago.apstages.service.StageUnlockApplier;
 import com.minecraftarchipelago.apstages.state.StageUnlockState;
-import com.minecraftarchipelago.item.APItems;
-import com.minecraftarchipelago.loot.APLootTables;
 import net.fabricmc.api.ModInitializer;
 
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
@@ -42,8 +40,6 @@ public class MinecraftArchipelago implements ModInitializer {
 				.registerReloadListener(new APLocationsReloadListener());
 		ResourceManagerHelper.get(ResourceType.SERVER_DATA)
 				.registerReloadListener(new APItemsReloadListener());
-		APItems.register();
-		APLootTables.register();
 
 		ServerPlayConnectionEvents.JOIN.register((handler, sender, server) -> {
 			ServerPlayerEntity player = handler.player;

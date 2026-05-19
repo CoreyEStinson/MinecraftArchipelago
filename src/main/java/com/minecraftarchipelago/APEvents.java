@@ -7,11 +7,7 @@ import com.minecraftarchipelago.aplocations.CheckedLocationsState;
 import com.minecraftarchipelago.aplocations.VictoryCondition;
 import com.minecraftarchipelago.apstages.service.StageUnlockApplier;
 import com.minecraftarchipelago.apstages.state.StageUnlockState;
-import com.minecraftarchipelago.item.ArchipelagoCheckItem;
-import com.minecraftarchipelago.loot.LootCheckAssignmentState;
-import com.minecraftarchipelago.loot.LootCheckScoutPending;
 import io.github.archipelagomw.events.*;
-import io.github.archipelagomw.parts.NetworkItem;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
@@ -23,8 +19,6 @@ import net.minecraft.sound.SoundEvents;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
 
 public class APEvents {
@@ -88,31 +82,6 @@ public class APEvents {
             // If goal was already achieved in a previous session, silently resend
             VictoryCondition.resendIfAchieved(server);
         });
-
-        MinecraftClient mc = MinecraftClient.getInstance();
-        // Re-scout any tokens in inventory that are assigned but not yet named
-        if (mc.player != null) {
-            ServerPlayerEntity serverPlayer =
-                    server.getPlayerManager().getPlayer(mc.player.getUuid());
-            if (serverPlayer != null) {
-                List<Long> needsScout = new ArrayList<>();
-                for (int i = 0; i < serverPlayer.getInventory().size(); i++) {
-                    ItemStack stack = serverPlayer.getInventory().getStack(i);
-                    if (stack.getItem() instanceof ArchipelagoCheckItem
-                            && ArchipelagoCheckItem.isAssigned(stack)
-                            && !ArchipelagoCheckItem.isScouted(stack)) {
-                        needsScout.add(ArchipelagoCheckItem.getLocationId(stack));
-                    }
-                }
-                if (!needsScout.isEmpty()) {
-                    needsScout.forEach(id -> {
-                        ArrayList<Long> locations = new ArrayList<>();
-                        locations.add(id);
-                        APSession.CLIENT.scoutLocations(locations);
-                    });
-                }
-            }
-        }
     }
 
     @ArchipelagoEventListener
@@ -192,36 +161,6 @@ public class APEvents {
     @ArchipelagoEventListener
     public void onLocationInfo(LocationInfoEvent e) {
         System.out.println("Got location info: " + e);
-
-        if (e.locations == null || e.locations.isEmpty()) return;
-
-
-        MinecraftClient mc = MinecraftClient.getInstance();
-        mc.execute(() -> {
-            MinecraftServer server = mc.getServer();
-            if (server == null) return;
-
-            server.execute(() -> {
-                LootCheckAssignmentState assignState = LootCheckAssignmentState.get(server);
-
-                for (NetworkItem item : e.locations) {
-                    long locationId = item.locationID;
-                    String apItemName = item.itemName != null ? item.itemName : "???";
-                    String apPlayer = item.playerName != null ? item.playerName : "???";
-                    int checkIndex = assignState.getCheckedIndex(locationId);
-
-                    LootCheckScoutPending.resolve(locationId, checkIndex, apItemName, apPlayer);
-
-                    if (mc.player != null) {
-                        ServerPlayerEntity serverPlayer =
-                                server.getPlayerManager().getPlayer(mc.player.getUuid());
-                        if (serverPlayer != null) {
-                            updateInventory(serverPlayer, locationId, checkIndex, apItemName, apPlayer);
-                        }
-                    }
-                }
-            });
-        });
     }
 
     @ArchipelagoEventListener
@@ -274,18 +213,5 @@ public class APEvents {
                 });
             });
         });
-    }
-
-    private static void updateInventory(ServerPlayerEntity player, long locationId, int checkIndex, String itemName, String playerName) {
-        boolean changed = false;
-        for (int i = 0; i < player.getInventory().size(); i++){
-           ItemStack stack = player.getInventory().getStack(i);
-           if (!(stack.getItem() instanceof ArchipelagoCheckItem)) continue;
-           if (ArchipelagoCheckItem.getLocationId(stack) != locationId) continue;
-
-           ArchipelagoCheckItem.setCheckData(stack, locationId, checkIndex, itemName, playerName);
-           changed = true;
-        }
-        if (changed) player.getInventory().markDirty();
     }
 }
