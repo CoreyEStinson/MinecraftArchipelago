@@ -4,9 +4,11 @@ import com.minecraftarchipelago.apstages.StageRegistry;
 import com.minecraftarchipelago.apstages.model.ItemStageRules;
 import com.minecraftarchipelago.apstages.model.StageDef;
 import com.minecraftarchipelago.apstages.state.StageUnlockState;
+import net.minecraft.block.BlockState;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.registry.Registries;
+import net.minecraft.registry.RegistryKey;
 import net.minecraft.registry.RegistryKeys;
 import net.minecraft.registry.tag.TagKey;
 import net.minecraft.server.network.ServerPlayerEntity;
@@ -31,6 +33,35 @@ public class ItemAccessHelper
             if (stack.isIn(tag)) return true;
         }
         
+        return false;
+    }
+
+    public static boolean isBlockInteractionLocked(ServerPlayerEntity player, BlockState state) {
+        Set<Identifier> unlocked = StageUnlockState.get(player.getServer()).getUnlocked(player.getUuid());
+
+        for (Identifier stageId : unlocked) {
+            StageDef stage = StageRegistry.getStage(stageId);
+            if (stage == null) continue;
+            if (matchesBlock(state, stage.blockRules().unlockBlockIds(),
+                                    stage.blockRules().unlockBlockTags())) return false;
+        }
+
+        for (Identifier stageId : unlocked) {
+            StageDef stage = StageRegistry.getStage(stageId);
+            if (stage == null) continue;
+            if (matchesBlock(state, stage.blockRules().lockBlockIds(),
+                                    stage.blockRules().lockBlockTags())) return true;
+        }
+        return false;
+    }
+
+    private static boolean matchesBlock(BlockState state,
+                                        Set<Identifier> ids,
+                                        Set<Identifier> tags) {
+        if (ids.contains(Registries.BLOCK.getId(state.getBlock()))) return true;
+        for (Identifier tagId : tags) {
+            if (state.isIn(TagKey.of(RegistryKeys.BLOCK, tagId))) return true;
+        }
         return false;
     }
     

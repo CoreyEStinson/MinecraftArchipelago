@@ -1,0 +1,5 @@
+{
+  "items": { "lock": [], "unlock": ["#minecraft:shulker_boxes"] },
+  "blocks": { "lock": [], "unlock": ["#minecraft:shulker_boxes"] },
+  "world": { "gamerules": {} }, "grants": { "packages": [] }
+}

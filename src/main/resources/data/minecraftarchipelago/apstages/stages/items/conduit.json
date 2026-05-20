@@ -1,0 +1,5 @@
+{
+  "items": { "lock": [], "unlock": ["minecraft:conduit"] },
+  "blocks": { "lock": [], "unlock": [] },
+  "world": { "gamerules": {} }, "grants": { "packages": [] }
+}

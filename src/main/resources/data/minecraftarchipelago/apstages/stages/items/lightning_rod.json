@@ -1,0 +1,5 @@
+{
+  "items": { "lock": [], "unlock": ["minecraft:lightning_rod"] },
+  "blocks": { "lock": [], "unlock": [] },
+  "world": { "gamerules": {} }, "grants": { "packages": [] }
+}

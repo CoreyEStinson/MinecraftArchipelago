@@ -1,0 +1,5 @@
+{
+  "items": { "lock": [], "unlock": ["minecraft:grindstone"] },
+  "blocks": { "lock": [], "unlock": ["minecraft:grindstone"] },
+  "world": { "gamerules": {} }, "grants": { "packages": [] }
+}

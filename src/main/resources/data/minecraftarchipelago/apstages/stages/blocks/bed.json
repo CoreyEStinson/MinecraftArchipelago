@@ -1,0 +1,5 @@
+{
+  "items": { "lock": [], "unlock": ["#minecraft:beds"] },
+  "blocks": { "lock": [], "unlock": ["#minecraft:beds"] },
+  "world": { "gamerules": {} }, "grants": { "packages": [] }
+}

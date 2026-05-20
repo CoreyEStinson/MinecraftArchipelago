@@ -1,0 +1,5 @@
+{
+  "items": { "lock": [], "unlock": ["minecraft:smithing_table"] },
+  "blocks": { "lock": [], "unlock": ["minecraft:smithing_table"] },
+  "world": { "gamerules": {} }, "grants": { "packages": [] }
+}

@@ -1,0 +1,5 @@
+{
+  "items": { "lock": [], "unlock": ["minecraft:furnace","minecraft:blast_furnace","minecraft:smoker"] },
+  "blocks": { "lock": [], "unlock": ["minecraft:furnace","minecraft:blast_furnace","minecraft:smoker"] },
+  "world": { "gamerules": {} }, "grants": { "packages": [] }
+}

@@ -125,6 +125,23 @@ public class APStagesReloadListener  implements SimpleSynchronousResourceReloadL
                     unlockItemTags
                 );
 
+                Set<Identifier> lockBlockIds = new HashSet<>();
+                Set<Identifier> lockBlockTags = new HashSet<>();
+                Set<Identifier> unlockBlockIds = new HashSet<>();
+                Set<Identifier> unlockBlockTags = new HashSet<>();
+
+                if (root.has("blocks")) {
+                    JsonObject blocks = root.getAsJsonObject("blocks");
+                    if (blocks.has("lock"))
+                        parseItemRefs(blocks.getAsJsonArray("lock"), lockBlockIds, lockBlockTags);
+                    if (blocks.has("unlock"))
+                        parseItemRefs(blocks.getAsJsonArray("unlock"), unlockBlockIds, unlockBlockTags);
+                }
+
+                BlockStageRules blockRules = new BlockStageRules(
+                        lockBlockIds, lockBlockTags, unlockBlockIds, unlockBlockTags
+                );
+
                 // world.gamerules
                 Map<String, String> gamerules = new HashMap<>();
                 if (root.has("world")){
@@ -152,6 +169,7 @@ public class APStagesReloadListener  implements SimpleSynchronousResourceReloadL
                 StageRegistry.putStage(stageId, new StageDef(
                         requiredChecks,
                         itemRules,
+                        blockRules,
                         gamerules,
                         packages
                 ));

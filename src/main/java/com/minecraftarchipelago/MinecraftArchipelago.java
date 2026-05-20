@@ -1,7 +1,9 @@
 package com.minecraftarchipelago;
 
 import com.minecraftarchipelago.apitems.APItemsReloadListener;
+import com.minecraftarchipelago.aplocations.APBossKillLocationsReloadListener;
 import com.minecraftarchipelago.aplocations.APLocationsReloadListener;
+import com.minecraftarchipelago.aplocations.BossKillListener;
 import com.minecraftarchipelago.apstages.APStagesReloadListener;
 import com.minecraftarchipelago.apstages.command.StageCommands;
 import com.minecraftarchipelago.apstages.item.ItemStageEnforcer;
@@ -40,6 +42,9 @@ public class MinecraftArchipelago implements ModInitializer {
 				.registerReloadListener(new APLocationsReloadListener());
 		ResourceManagerHelper.get(ResourceType.SERVER_DATA)
 				.registerReloadListener(new APItemsReloadListener());
+		ResourceManagerHelper.get(ResourceType.SERVER_DATA)
+				.registerReloadListener(new APBossKillLocationsReloadListener());
+		BossKillListener.register();
 
 		ServerPlayConnectionEvents.JOIN.register((handler, sender, server) -> {
 			ServerPlayerEntity player = handler.player;

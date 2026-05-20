@@ -1,0 +1,5 @@
+{
+  "items": { "lock": [], "unlock": ["minecraft:brewing_stand"] },
+  "blocks": { "lock": [], "unlock": ["minecraft:brewing_stand"] },
+  "world": { "gamerules": {} }, "grants": { "packages": [] }
+}

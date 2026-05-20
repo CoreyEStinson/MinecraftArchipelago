@@ -30,8 +30,7 @@ public class APLocationsReloadListener implements SimpleSynchronousResourceReloa
 
         Map<Identifier, Resource> found = manager.findResources(
                 "aplocations",
-                id -> id.getPath().endsWith(".json")
-        );
+                id -> id.getPath().equals("aplocations/advancements.json"));
 
         for (var entry : found.entrySet()) {
             try (var reader = new InputStreamReader(

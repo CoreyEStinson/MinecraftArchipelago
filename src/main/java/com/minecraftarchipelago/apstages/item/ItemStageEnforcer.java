@@ -5,6 +5,7 @@ import net.fabricmc.fabric.api.event.player.AttackBlockCallback;
 import net.fabricmc.fabric.api.event.player.AttackEntityCallback;
 import net.fabricmc.fabric.api.event.player.UseBlockCallback;
 import net.fabricmc.fabric.api.event.player.UseItemCallback;
+import net.minecraft.block.BlockState;
 import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.item.Equipment;
 import net.minecraft.item.ItemStack;
@@ -105,12 +106,14 @@ public class ItemStageEnforcer {
             }
 
             ItemStack stack = player.getStackInHand(hand);
-            if (stack.isEmpty()){
-                return ActionResult.PASS;
+            if (!stack.isEmpty() && ItemAccessHelper.isLocked(serverPlayer, stack)){
+                serverPlayer.sendMessage(Text.literal("That item is locked."), true);
+                return ActionResult.FAIL;
             }
 
-            if (ItemAccessHelper.isLocked(serverPlayer, stack)){
-                player.sendMessage(Text.literal("That item is locked"), true);
+            BlockState targetBlock = world.getBlockState(hit.getBlockPos());
+            if (ItemAccessHelper.isBlockInteractionLocked(serverPlayer, targetBlock)) {
+                serverPlayer.sendMessage(Text.literal("That block is locked."), true);
                 return ActionResult.FAIL;
             }
 

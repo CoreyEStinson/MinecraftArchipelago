@@ -1,0 +1,5 @@
+{
+  "items": { "lock": [], "unlock": ["#minecraft:campfires"] },
+  "blocks": { "lock": [], "unlock": ["#minecraft:campfires"] },
+  "world": { "gamerules": {} }, "grants": { "packages": [] }
+}

@@ -1,0 +1,5 @@
+{
+  "items": { "lock": [], "unlock": ["minecraft:composter"] },
+  "blocks": { "lock": [], "unlock": ["minecraft:composter"] },
+  "world": { "gamerules": {} }, "grants": { "packages": [] }
+}

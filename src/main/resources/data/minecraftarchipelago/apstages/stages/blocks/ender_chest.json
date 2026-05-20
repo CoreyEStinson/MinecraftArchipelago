@@ -1,0 +1,5 @@
+{
+  "items": { "lock": [], "unlock": ["minecraft:ender_chest"] },
+  "blocks": { "lock": [], "unlock": ["minecraft:ender_chest"] },
+  "world": { "gamerules": {} }, "grants": { "packages": [] }
+}
