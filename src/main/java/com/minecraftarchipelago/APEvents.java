@@ -75,6 +75,20 @@ public class APEvents {
             MinecraftArchipelagoClient.LOGGER.info(
                     "[AP] Resending {} previously check locations.", allChecked.size());
 
+            // Sync missing advancements
+            ServerPlayerEntity player = server.getPlayerManager().getPlayerList().isEmpty() ? null : server.getPlayerManager().getPlayerList().getFirst();
+            if (player != null) {
+                net.minecraft.advancement.PlayerAdvancementTracker tracker = player.getAdvancementTracker();
+                for (net.minecraft.advancement.AdvancementEntry adv : server.getAdvancementLoader().getAdvancements()) {
+                    if (tracker.getProgress(adv).isDone()) {
+                        Long locId = com.minecraftarchipelago.aplocations.LocationRegistry.getLocationId(adv.id());
+                        if (locId != null && state.checkLocation(locId)) {
+                            allChecked = state.getAllChecked(); // Update referenced Set
+                        }
+                    }
+                }
+            }
+
             for (long locationId : allChecked){
                 APSession.CLIENT.checkLocation(locationId);
             }

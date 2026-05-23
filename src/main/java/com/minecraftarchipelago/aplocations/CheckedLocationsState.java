@@ -104,4 +104,8 @@ public final class CheckedLocationsState extends PersistentState{
         markDirty();
         return true;
     }
+
+    public boolean isLocationChecked(long locationId) {
+        return checkedIds.contains(locationId);
+    }
 }

@@ -53,6 +53,12 @@ public final class APHudRenderer {
     private static int dragOffsetY = 0;
     private static boolean prevMouseBtn = false;
 
+    // Boss kill location IDs — must match locations.py
+    private static final long ID_DRAGON = 42113;
+    private static final long ID_WITHER = 42114;
+    private static final long ID_ELDER  = 42115;
+    private static final long ID_WARDEN = 42116;
+
     public static void register() {
         loadPosition();
         ClientTickEvents.END_CLIENT_TICK.register(APHudRenderer::updateState);
@@ -60,27 +66,39 @@ public final class APHudRenderer {
     }
 
     private static void updateState(MinecraftClient client) {
-        APHudState.connected = APSession.CLIENT.isConnected();
-        APHudState.address = APSession.CLIENT.isConnected()
-                ? APSession.CLIENT.getConnectedAddress()
-                : "-";
-
-        APHudState.locationsTotal = LocationRegistry.size();
-
-        if (APSession.hasSlotData()) {
-            APHudState.goalPercent = APSession.getSlotData().getAdvancementGoalPercent();
-        }
-
         MinecraftServer server = client.getServer();
         if (server != null && client.player != null) {
+            APHudState.connected = APSession.CLIENT.isConnected();
+            APHudState.address = APSession.CLIENT.getConnectedAddress();
+            if (APHudState.address == null) APHudState.address = "-";
+
             CheckedLocationsState locs = CheckedLocationsState.get(server);
+
             APHudState.locationsChecked = locs.checkedCount();
-            APHudState.goalAchieved = locs.isGoalAchieved();
+            APHudState.locationsTotal   = LocationRegistry.size();
+            APHudState.goalAchieved     = locs.isGoalAchieved();
+
+            // Boss kill states
+            APHudState.dragonKilled        = locs.isLocationChecked(ID_DRAGON);
+            APHudState.witherKilled        = locs.isLocationChecked(ID_WITHER);
+            APHudState.elderGuardianKilled = locs.isLocationChecked(ID_ELDER);
+            APHudState.wardenKilled        = locs.isLocationChecked(ID_WARDEN);
+
+            APHudState.bossKillsChecked =
+                    (APHudState.dragonKilled        ? 1 : 0) +
+                            (APHudState.witherKilled        ? 1 : 0) +
+                            (APHudState.elderGuardianKilled ? 1 : 0) +
+                            (APHudState.wardenKilled        ? 1 : 0);
+
+            // Advancements
+            APHudState.advancementsChecked =
+                    APHudState.locationsChecked;
+            APHudState.advancementsTotal   =
+                    APHudState.locationsTotal;
 
             ServerPlayerEntity serverPlayer =
                     server.getPlayerManager().getPlayer(client.player.getUuid());
             if (serverPlayer != null) {
-                // subtract 1 to exclude base_rules from the count
                 int raw = StageUnlockState.get(server)
                         .getUnlocked(serverPlayer.getUuid()).size();
                 APHudState.stagesUnlocked = Math.max(0, raw - 1);
@@ -142,13 +160,13 @@ public final class APHudRenderer {
         cy += LINE;
         cy = separator(ctx, cx, cy + 2, x);
 
-        //  --- Progress ---
-        ctx.drawTextWithShadow(tr, "Progress", cx, cy += 2, COL_TITLE);
+        // ── Advancements ──────────────────────────────────────────────────────
+        ctx.drawTextWithShadow(tr, "Advancements", cx, cy += 2, COL_TITLE);
         cy += LINE;
 
-        // Location count
-        String count = APHudState.locationsChecked + " / " + APHudState.locationsTotal;
-        ctx.drawTextWithShadow(tr, count, cx + 4, cy, COL_WHITE);
+        // Count
+        String advCount = APHudState.advancementsChecked + " / " + APHudState.advancementsTotal;
+        ctx.drawTextWithShadow(tr, advCount, cx + 4, cy, COL_WHITE);
         cy += LINE;
 
         // Progress bar
@@ -158,34 +176,52 @@ public final class APHudRenderer {
         int barCol = APHudState.goalAchieved ? COL_BAR_WIN : COL_BAR_FILL;
         ctx.fill(barX, cy, barX + barW, cy + BAR_HEIGHT, COL_BAR_BG);
         if (fillW > 0) ctx.fill(barX, cy, barX + fillW, cy + BAR_HEIGHT, barCol);
-        // Goal marker line
-        int goalX = barX + (int)(
-                (float) APHudState.locationsRequired() / APHudState.locationsTotal * barW
-        );
-        goalX = Math.min(goalX, barX + barW - 1);
-        ctx.fill(goalX, cy - 1, goalX + 1, cy + BAR_HEIGHT + 1, COL_YELLOW);
+        // Goal marker (based on full location pool)
+        if (APHudState.advancementsTotal > 0) {
+            int goalX = barX + (int)(
+                    (float)(APHudState.locationsRequired() - APHudState.BOSS_KILLS_TOTAL)
+                            / APHudState.advancementsTotal * barW
+            );
+            goalX = Math.max(barX, Math.min(goalX, barX + barW - 1));
+            ctx.fill(goalX, cy - 1, goalX + 1, cy + BAR_HEIGHT + 1, COL_YELLOW);
+        }
         cy += BAR_HEIGHT + 4;
 
-        // Goal text
+        // Goal text — references total locations (all types)
         if (APHudState.goalAchieved) {
             ctx.drawTextWithShadow(tr, "✓ Goal complete!", cx + 4, cy, COL_YELLOW);
             cy += LINE;
         } else {
-            int req = APHudState.locationsRequired();
+            int req       = APHudState.locationsRequired();
             int remaining = APHudState.locationsRemaining();
             ctx.drawTextWithShadow(tr,
-                    "Goal: " + APHudState.goalPercent + "% (→ " + req + ")",
+                    "Goal: " + APHudState.goalPercent + "% → " + req + " total",
                     cx + 4, cy, COL_DIM);
             cy += LINE;
             int remCol = remaining <= 10 ? COL_YELLOW : COL_WHITE;
-            ctx.drawTextWithShadow(tr,
-                    remaining + " more needed",
-                    cx + 4, cy, remCol);
+            ctx.drawTextWithShadow(tr, remaining + " more needed", cx + 4, cy, remCol);
             cy += LINE;
         }
         cy = separator(ctx, cx, cy + 2, x);
 
-        // --- Summary ---
+        // ── Boss Kills ─────────────────────────────────────────────────────────
+        ctx.drawTextWithShadow(tr, "Boss Kills", cx, cy += 2, COL_TITLE);
+        cy += LINE;
+
+        drawBossLine(ctx, tr, cx, cy, "Ender Dragon",   APHudState.dragonKilled);        cy += LINE;
+        drawBossLine(ctx, tr, cx, cy, "Wither",          APHudState.witherKilled);        cy += LINE;
+        drawBossLine(ctx, tr, cx, cy, "Elder Guardian",  APHudState.elderGuardianKilled); cy += LINE;
+        drawBossLine(ctx, tr, cx, cy, "Warden",          APHudState.wardenKilled);        cy += LINE;
+
+        int bossColor = APHudState.bossKillsChecked == APHudState.BOSS_KILLS_TOTAL
+                ? COL_YELLOW : COL_DIM;
+        ctx.drawTextWithShadow(tr,
+                APHudState.bossKillsChecked + " / " + APHudState.BOSS_KILLS_TOTAL + " killed",
+                cx + 4, cy, bossColor);
+        cy += LINE;
+        cy = separator(ctx, cx, cy + 2, x);
+
+        // ── Summary ────────────────────────────────────────────────────────────
         ctx.drawTextWithShadow(tr,
                 "Stages unlocked: " + APHudState.stagesUnlocked,
                 cx + 4, cy, COL_DIM);
@@ -211,20 +247,27 @@ public final class APHudRenderer {
     // Computes panel height based on current state
     private static int computeHeight() {
         int h = PAD * 2;
-        h += LINE + 2;  // title
-        h += 5;         // separator
-        h += LINE;      // connection status
+        h += LINE + 2;   // title
+        h += 5;          // separator
+        h += LINE;       // connection status
         if (APHudState.connected) {
-            h += LINE;  // address
-            h += LINE;  // slot
+            h += LINE;   // address
+            h += LINE;   // slot
         }
-        h += 5;         // separator
-        h += LINE;      // "Progress" header
-        h += LINE;      // count
-        h += BAR_HEIGHT + 4;  // bar
-        h += APHudState.goalAchieved ? LINE : LINE * 2;  // goal lines
-        h += 5;         // separator
-        h += LINE;      // stages line
+        h += 5;          // separator
+        h += LINE;       // "Advancements" header
+        h += LINE;       // count
+        h += BAR_HEIGHT + 4;
+        h += APHudState.goalAchieved ? LINE : LINE * 2;
+        h += 5;          // separator
+
+        // Boss kills section
+        h += LINE;       // "Boss Kills" header
+        h += LINE * 4;   // four boss entries
+        h += LINE;       // kill counter
+        h += 5;          // separator
+
+        h += LINE;       // stages line
         return h;
     }
 
@@ -269,6 +312,13 @@ public final class APHudRenderer {
         x = Math.max(0, Math.min(x, sw - PANEL_WIDTH));
         y = Math.max(0, Math.min(y, sh - panelHeight));
         return new int[]{x, y};
+    }
+
+    private static void drawBossLine(DrawContext ctx, TextRenderer tr,
+                                     int cx, int cy, String name, boolean killed) {
+        String icon  = killed ? "✓" : "○";
+        int color = killed ? COL_GREEN : COL_DIM;
+        ctx.drawTextWithShadow(tr, icon + " " + name, cx + 4, cy, color);
     }
 
     // Drag handler

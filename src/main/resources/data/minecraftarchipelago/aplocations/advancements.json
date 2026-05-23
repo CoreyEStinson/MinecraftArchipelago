@@ -15,6 +15,7 @@
     { "advancement": "minecraft:story/cure_zombie_villager",                        "location_id": 42012 },
     { "advancement": "minecraft:story/follow_ender_eye",                            "location_id": 42013 },
     { "advancement": "minecraft:story/enter_the_end",                               "location_id": 42014 },
+    { "advancement": "minecraft:story/enchant_item",                                "location_id": 42113 },
 
     { "advancement": "minecraft:nether/return_to_sender",                           "location_id": 42015 },
     { "advancement": "minecraft:nether/find_bastion",                               "location_id": 42016 },
@@ -48,9 +49,8 @@
     { "advancement": "minecraft:end/elytra",                                        "location_id": 42043 },
     { "advancement": "minecraft:end/levitate",                                      "location_id": 42044 },
 
-    { "advancement": "minecraft:adventure/heart_transplanter",                      "location_id": 42045 },
     { "advancement": "minecraft:adventure/voluntary_exile",                         "location_id": 42046 },
-    { "advancement": "minecraft:adventure/use_loadstone",                           "location_id": 42047 },
+    { "advancement": "minecraft:nether/use_lodestone",                              "location_id": 42047 },
     { "advancement": "minecraft:adventure/spyglass_at_parrot",                      "location_id": 42048 },
     { "advancement": "minecraft:adventure/kill_a_mob",                              "location_id": 42049 },
     { "advancement": "minecraft:adventure/read_power_of_chiseled_bookshelf",        "location_id": 42050 },
@@ -92,6 +92,7 @@
     { "advancement": "minecraft:adventure/revaulting",                              "location_id": 42086 },
     { "advancement": "minecraft:adventure/blowback",                                "location_id": 42087 },
     { "advancement": "minecraft:adventure/overoverkill",                            "location_id": 42088 },
+    { "advancement": "minecraft:adventure/crafters_crafting_crafters",              "location_id": 42114 },
 
     { "advancement": "minecraft:husbandry/safely_harvest_honey",                    "location_id": 42089 },
     { "advancement": "minecraft:husbandry/breed_an_animal",                         "location_id": 42090 },
@@ -116,7 +117,11 @@
     { "advancement": "minecraft:husbandry/wax_off",                                 "location_id": 42109 },
     { "advancement": "minecraft:husbandry/axolotl_in_a_bucket",                     "location_id": 42110 },
     { "advancement": "minecraft:husbandry/froglights",                              "location_id": 42111 },
-    { "advancement": "minecraft:husbandry/plant_any_sniffer_seed",                  "location_id": 42112 }
+    { "advancement": "minecraft:husbandry/plant_any_sniffer_seed",                  "location_id": 42112 },
+    { "advancement": "minecraft:husbandry/kill_axolotl_target",                     "location_id": 42115 },
+    { "advancement": "minecraft:husbandry/repair_wolf_armor",                       "location_id": 42116 },
+    { "advancement": "minecraft:husbandry/whole_pack",                              "location_id": 42117 },
+    { "advancement": "minecraft:husbandry/remove_wolf_armor",                       "location_id": 42118 }
 
   ]
 }
