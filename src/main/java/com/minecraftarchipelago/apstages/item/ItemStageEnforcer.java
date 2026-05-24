@@ -44,7 +44,16 @@ public class ItemStageEnforcer {
 
             if (ItemAccessHelper.isLocked(serverPlayer, stack)){
                 player.sendMessage(Text.literal("That item is locked"), true);
+                serverPlayer.networkHandler.sendPacket(new net.minecraft.network.packet.s2c.play.ScreenHandlerSlotUpdateS2CPacket(-2, 0, serverPlayer.getInventory().selectedSlot, stack));
                 return TypedActionResult.fail(stack);
+            }
+
+            if (stack.getItem() instanceof net.minecraft.item.BlockItem blockItem) {
+                if (ItemAccessHelper.isBlockInteractionLocked(serverPlayer, blockItem.getBlock().getDefaultState())) {
+                    player.sendMessage(Text.literal("That block is locked"), true);
+                    serverPlayer.networkHandler.sendPacket(new net.minecraft.network.packet.s2c.play.ScreenHandlerSlotUpdateS2CPacket(-2, 0, serverPlayer.getInventory().selectedSlot, stack));
+                    return TypedActionResult.fail(stack);
+                }
             }
 
             return TypedActionResult.pass(stack);
@@ -108,7 +117,16 @@ public class ItemStageEnforcer {
             ItemStack stack = player.getStackInHand(hand);
             if (!stack.isEmpty() && ItemAccessHelper.isLocked(serverPlayer, stack)){
                 serverPlayer.sendMessage(Text.literal("That item is locked."), true);
+                serverPlayer.networkHandler.sendPacket(new net.minecraft.network.packet.s2c.play.ScreenHandlerSlotUpdateS2CPacket(-2, 0, serverPlayer.getInventory().selectedSlot, stack));
                 return ActionResult.FAIL;
+            }
+
+            if (!stack.isEmpty() && stack.getItem() instanceof net.minecraft.item.BlockItem blockItem) {
+                if (ItemAccessHelper.isBlockInteractionLocked(serverPlayer, blockItem.getBlock().getDefaultState())) {
+                    serverPlayer.sendMessage(Text.literal("That block is locked."), true);
+                    serverPlayer.networkHandler.sendPacket(new net.minecraft.network.packet.s2c.play.ScreenHandlerSlotUpdateS2CPacket(-2, 0, serverPlayer.getInventory().selectedSlot, stack));
+                    return ActionResult.FAIL;
+                }
             }
 
             BlockState targetBlock = world.getBlockState(hit.getBlockPos());

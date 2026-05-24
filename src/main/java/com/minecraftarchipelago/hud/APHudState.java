@@ -20,15 +20,17 @@ public final class APHudState {
     public static int advancementsTotal   = 0;
 
     // Boss kills
-    public static boolean dragonKilled = false;
-    public static boolean witherKilled = false;
-    public static boolean elderGuardianKilled = false;
-    public static boolean wardenKilled = false;
+    public static java.util.Map<String, Boolean> bossKills = new java.util.LinkedHashMap<>();
     public static int bossKillsChecked = 0;
-    public static final int BOSS_KILLS_TOTAL = 4;
 
     // Stages
     public static int stagesUnlocked = 0;
+
+    // Equipment
+    public static String armorTier = "None";
+    public static int armorColor = 0xFF555555;
+    public static String toolTier = "None";
+    public static int toolColor = 0xFF555555;
 
     // Computed helpers
     public static int locationsRequired() {

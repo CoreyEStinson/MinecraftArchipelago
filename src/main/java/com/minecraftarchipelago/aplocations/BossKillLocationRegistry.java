@@ -21,6 +21,10 @@ public class BossKillLocationRegistry {
         return BOSS_LOCATIONS.get(Registries.ENTITY_TYPE.getId(type));
     }
 
+    public static Map<Identifier, Long> getAll() {
+        return java.util.Collections.unmodifiableMap(BOSS_LOCATIONS);
+    }
+
     public static int size() { return BOSS_LOCATIONS.size(); }
 
     private BossKillLocationRegistry() {}

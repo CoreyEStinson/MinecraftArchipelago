@@ -6,6 +6,7 @@ import com.minecraftarchipelago.APSession;
 import com.minecraftarchipelago.MinecraftArchipelago;
 import com.minecraftarchipelago.aplocations.CheckedLocationsState;
 import com.minecraftarchipelago.aplocations.LocationRegistry;
+import com.minecraftarchipelago.aplocations.BossKillLocationRegistry;
 import com.minecraftarchipelago.apstages.state.StageUnlockState;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.rendering.v1.HudRenderCallback;
@@ -16,10 +17,13 @@ import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.render.RenderTickCounter;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.text.Text;
+import net.minecraft.util.Identifier;
 import org.lwjgl.glfw.GLFW;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Set;
 
 public final class APHudRenderer {
 
@@ -53,12 +57,6 @@ public final class APHudRenderer {
     private static int dragOffsetY = 0;
     private static boolean prevMouseBtn = false;
 
-    // Boss kill location IDs — must match locations.py
-    private static final long ID_DRAGON = 42113;
-    private static final long ID_WITHER = 42114;
-    private static final long ID_ELDER  = 42115;
-    private static final long ID_WARDEN = 42116;
-
     public static void register() {
         loadPosition();
         ClientTickEvents.END_CLIENT_TICK.register(APHudRenderer::updateState);
@@ -79,16 +77,21 @@ public final class APHudRenderer {
             APHudState.goalAchieved     = locs.isGoalAchieved();
 
             // Boss kill states
-            APHudState.dragonKilled        = locs.isLocationChecked(ID_DRAGON);
-            APHudState.witherKilled        = locs.isLocationChecked(ID_WITHER);
-            APHudState.elderGuardianKilled = locs.isLocationChecked(ID_ELDER);
-            APHudState.wardenKilled        = locs.isLocationChecked(ID_WARDEN);
-
-            APHudState.bossKillsChecked =
-                    (APHudState.dragonKilled        ? 1 : 0) +
-                            (APHudState.witherKilled        ? 1 : 0) +
-                            (APHudState.elderGuardianKilled ? 1 : 0) +
-                            (APHudState.wardenKilled        ? 1 : 0);
+            APHudState.bossKills.clear();
+            APHudState.bossKillsChecked = 0;
+            for (var entry : BossKillLocationRegistry.getAll().entrySet()) {
+                Identifier entityId = entry.getKey();
+                long bossLocId = entry.getValue();
+                boolean killed = locs.isLocationChecked(bossLocId);
+                
+                String nameKey = "entity." + entityId.getNamespace() + "." + entityId.getPath();
+                String displayName = Text.translatable(nameKey).getString();
+                
+                APHudState.bossKills.put(displayName, killed);
+                if (killed) {
+                    APHudState.bossKillsChecked++;
+                }
+            }
 
             // Advancements
             APHudState.advancementsChecked =
@@ -99,9 +102,45 @@ public final class APHudRenderer {
             ServerPlayerEntity serverPlayer =
                     server.getPlayerManager().getPlayer(client.player.getUuid());
             if (serverPlayer != null) {
-                int raw = StageUnlockState.get(server)
-                        .getUnlocked(serverPlayer.getUuid()).size();
+                Set<Identifier> unlocked = StageUnlockState.get(server)
+                        .getUnlocked(serverPlayer.getUuid());
+                int raw = unlocked.size();
                 APHudState.stagesUnlocked = Math.max(0, raw - 1);
+                
+                int darkGray = 0xFF555555;
+                if (unlocked.contains(Identifier.of("minecraftarchipelago", "armor/netherite_armor"))) {
+                    APHudState.armorTier = "Netherite";
+                    APHudState.armorColor = 0xFF550000;
+                } else if (unlocked.contains(Identifier.of("minecraftarchipelago", "armor/diamond_armor"))) {
+                    APHudState.armorTier = "Diamond";
+                    APHudState.armorColor = 0xFF55FFFF;
+                } else if (unlocked.contains(Identifier.of("minecraftarchipelago", "armor/iron_armor"))) {
+                    APHudState.armorTier = "Iron";
+                    APHudState.armorColor = 0xFFFFFFFF;
+                } else if (unlocked.contains(Identifier.of("minecraftarchipelago", "armor/leather_armor"))) {
+                    APHudState.armorTier = "Leather";
+                    APHudState.armorColor = 0xFFFFAA00;
+                } else {
+                    APHudState.armorTier = "None";
+                    APHudState.armorColor = darkGray;
+                }
+                
+                if (unlocked.contains(Identifier.of("minecraftarchipelago", "tools/netherite_tools"))) {
+                    APHudState.toolTier = "Netherite";
+                    APHudState.toolColor = 0xFF550000;
+                } else if (unlocked.contains(Identifier.of("minecraftarchipelago", "tools/diamond_tools"))) {
+                    APHudState.toolTier = "Diamond";
+                    APHudState.toolColor = 0xFF55FFFF;
+                } else if (unlocked.contains(Identifier.of("minecraftarchipelago", "tools/iron_tools"))) {
+                    APHudState.toolTier = "Iron";
+                    APHudState.toolColor = 0xFFFFFFFF;
+                } else if (unlocked.contains(Identifier.of("minecraftarchipelago", "tools/stone_tools"))) {
+                    APHudState.toolTier = "Stone";
+                    APHudState.toolColor = 0xFFAAAAAA;
+                } else {
+                    APHudState.toolTier = "None";
+                    APHudState.toolColor = darkGray;
+                }
             }
         }
     }
@@ -129,7 +168,7 @@ public final class APHudRenderer {
                 GLFW.glfwGetKey(handle, GLFW.GLFW_KEY_LEFT_ALT) == GLFW.GLFW_PRESS ||
                 GLFW.glfwGetKey(handle, GLFW.GLFW_KEY_RIGHT_ALT) == GLFW.GLFW_PRESS;
 
-        // Border changes colour to signal drag-ready or dragging
+        // Border changes color to signal drag-ready or dragging
         int borderColor = isDragging ? 0xFFFFAA00       // gold while dragging
                         : altHeld    ? 0xFF4488AA       // blue when Alt held
                         : COL_BORDER;                   // normal
@@ -178,8 +217,9 @@ public final class APHudRenderer {
         if (fillW > 0) ctx.fill(barX, cy, barX + fillW, cy + BAR_HEIGHT, barCol);
         // Goal marker (based on full location pool)
         if (APHudState.advancementsTotal > 0) {
+            int totalBossKills = APHudState.bossKills.size();
             int goalX = barX + (int)(
-                    (float)(APHudState.locationsRequired() - APHudState.BOSS_KILLS_TOTAL)
+                    (float)(APHudState.locationsRequired() - totalBossKills)
                             / APHudState.advancementsTotal * barW
             );
             goalX = Math.max(barX, Math.min(goalX, barX + barW - 1));
@@ -208,15 +248,16 @@ public final class APHudRenderer {
         ctx.drawTextWithShadow(tr, "Boss Kills", cx, cy += 2, COL_TITLE);
         cy += LINE;
 
-        drawBossLine(ctx, tr, cx, cy, "Ender Dragon",   APHudState.dragonKilled);        cy += LINE;
-        drawBossLine(ctx, tr, cx, cy, "Wither",          APHudState.witherKilled);        cy += LINE;
-        drawBossLine(ctx, tr, cx, cy, "Elder Guardian",  APHudState.elderGuardianKilled); cy += LINE;
-        drawBossLine(ctx, tr, cx, cy, "Warden",          APHudState.wardenKilled);        cy += LINE;
+        for (var entry : APHudState.bossKills.entrySet()) {
+            drawBossLine(ctx, tr, cx, cy, entry.getKey(), entry.getValue());
+            cy += LINE;
+        }
 
-        int bossColor = APHudState.bossKillsChecked == APHudState.BOSS_KILLS_TOTAL
+        int totalBoss = APHudState.bossKills.size();
+        int bossColor = (totalBoss > 0 && APHudState.bossKillsChecked == totalBoss)
                 ? COL_YELLOW : COL_DIM;
         ctx.drawTextWithShadow(tr,
-                APHudState.bossKillsChecked + " / " + APHudState.BOSS_KILLS_TOTAL + " killed",
+                APHudState.bossKillsChecked + " / " + totalBoss + " killed",
                 cx + 4, cy, bossColor);
         cy += LINE;
         cy = separator(ctx, cx, cy + 2, x);
@@ -225,6 +266,18 @@ public final class APHudRenderer {
         ctx.drawTextWithShadow(tr,
                 "Stages unlocked: " + APHudState.stagesUnlocked,
                 cx + 4, cy, COL_DIM);
+        cy += LINE;
+        cy = separator(ctx, cx, cy + 2, x);
+
+        // ── Equipment ──────────────────────────────────────────────────────────
+        ctx.drawTextWithShadow(tr, "Armor Tier Unlocked:", cx, cy += 2, COL_TITLE);
+        cy += LINE;
+        ctx.drawTextWithShadow(tr, APHudState.armorTier, cx + 4, cy, APHudState.armorColor);
+        cy += LINE;
+        
+        ctx.drawTextWithShadow(tr, "Tool Tier Unlocked:", cx, cy, COL_TITLE);
+        cy += LINE;
+        ctx.drawTextWithShadow(tr, APHudState.toolTier, cx + 4, cy, APHudState.toolColor);
     }
 
     // Helpers
@@ -263,11 +316,18 @@ public final class APHudRenderer {
 
         // Boss kills section
         h += LINE;       // "Boss Kills" header
-        h += LINE * 4;   // four boss entries
+        h += LINE * APHudState.bossKills.size();   // boss entries
         h += LINE;       // kill counter
         h += 5;          // separator
 
         h += LINE;       // stages line
+        h += 5;          // separator
+        
+        // Equipment section
+        h += LINE + 2;   // "Armor Tier Unlocked:"
+        h += LINE;       // armor tier
+        h += LINE;       // "Tool Tier Unlocked:"
+        h += LINE;       // tool tier
         return h;
     }
 

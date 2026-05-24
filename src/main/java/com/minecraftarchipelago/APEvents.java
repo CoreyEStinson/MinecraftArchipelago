@@ -183,6 +183,28 @@ public class APEvents {
     }
 
     @ArchipelagoEventListener
+    public void onCheckedLocations(CheckedLocationsEvent e) {
+        MinecraftClient mc = MinecraftClient.getInstance();
+        mc.execute(() -> {
+            MinecraftServer server = mc.getServer();
+            if (server == null) return;
+            server.execute(() -> {
+                CheckedLocationsState state = CheckedLocationsState.get(server);
+                boolean changed = false;
+                for (Long locationId : e.checkedLocations) {
+                    if (state.checkLocation(locationId)) {
+                        changed = true;
+                    }
+                }
+                if (changed) {
+                    MinecraftArchipelagoClient.LOGGER.info("[AP] Updated checked locations from server sync.");
+                    VictoryCondition.checkAndAward(server);
+                }
+            });
+        });
+    }
+
+    @ArchipelagoEventListener
     public void onPrint(PrintJSONEvent e){
         String msg = e.apPrint.getPlainText();
         MinecraftClient.getInstance().execute(() ->{
