@@ -53,6 +53,27 @@ dependencies {
 	implementation("org.apache.httpcomponents.core5:httpcore5:5.3.6")
 	include("org.apache.httpcomponents.core5:httpcore5:5.3.6")
 	
+	// Testing dependencies
+	testImplementation 'org.junit.jupiter:junit-jupiter:5.10.0'
+	testImplementation 'org.mockito:mockito-core:5.5.0'
+	testImplementation 'org.mockito:mockito-junit-jupiter:5.5.0'
+
+	testRuntimeOnly "org.junit.platform:junit-platform-launcher"
+
+
+	tasks.register('unitTest', Test) {
+		useJUnitPlatform()
+		systemProperty 'junit.jupiter.extensions.autodetection.enabled', 'true'
+		testLogging {
+			showStandardStreams = true
+			showExceptions = true
+			showStackTraces = true
+			exceptionFormat = 'full'
+		}
+		classpath = sourceSets.test.getRuntimeClasspath() + sourceSets.main.getRuntimeClasspath()
+		testClassesDirs = sourceSets.test.getOutput().getClassesDirs()
+		dependsOn compileTestJava, compileJava
+	}
 }
 
 processResources {
