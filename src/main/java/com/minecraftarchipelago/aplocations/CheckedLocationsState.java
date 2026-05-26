@@ -108,4 +108,12 @@ public final class CheckedLocationsState extends PersistentState{
     public boolean isLocationChecked(long locationId) {
         return checkedIds.contains(locationId);
     }
+
+    public int countCheckedInRange(long minIdInclusive, long maxIdExclusive) {
+        int count = 0;
+        for (long id = minIdInclusive; id < maxIdExclusive; id++) {
+            if (checkedIds.contains(id)) count++;
+        }
+        return count;
+    }
 }

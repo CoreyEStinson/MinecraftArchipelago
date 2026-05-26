@@ -59,21 +59,31 @@ dependencies {
 	testImplementation 'org.mockito:mockito-junit-jupiter:5.5.0'
 
 	testRuntimeOnly "org.junit.platform:junit-platform-launcher"
+}
 
-
-	tasks.register('unitTest', Test) {
-		useJUnitPlatform()
-		systemProperty 'junit.jupiter.extensions.autodetection.enabled', 'true'
-		testLogging {
-			showStandardStreams = true
-			showExceptions = true
-			showStackTraces = true
-			exceptionFormat = 'full'
-		}
-		classpath = sourceSets.test.getRuntimeClasspath() + sourceSets.main.getRuntimeClasspath()
-		testClassesDirs = sourceSets.test.getOutput().getClassesDirs()
-		dependsOn compileTestJava, compileJava
+tasks.named('test', Test) {
+	useJUnitPlatform()
+	systemProperty 'junit.jupiter.extensions.autodetection.enabled', 'true'
+	testLogging {
+		showStandardStreams = true
+		showExceptions = true
+		showStackTraces = true
+		exceptionFormat = 'full'
 	}
+}
+
+tasks.register('unitTest', Test) {
+	useJUnitPlatform()
+	systemProperty 'junit.jupiter.extensions.autodetection.enabled', 'true'
+	testLogging {
+		showStandardStreams = true
+		showExceptions = true
+		showStackTraces = true
+		exceptionFormat = 'full'
+	}
+	classpath = sourceSets.test.getRuntimeClasspath() + sourceSets.main.getRuntimeClasspath()
+	testClassesDirs = sourceSets.test.getOutput().getClassesDirs()
+	dependsOn compileTestJava, compileJava
 }
 
 processResources {

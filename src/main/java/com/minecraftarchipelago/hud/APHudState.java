@@ -32,6 +32,10 @@ public final class APHudState {
     public static String toolTier = "None";
     public static int toolColor = 0xFF555555;
 
+    // Lootable checks
+    public static int lootableChecksFound = 0;
+    public static int lootableChecksTotal = 0;
+
     // Computed helpers
     public static int locationsRequired() {
         return (int) Math.ceil(locationsTotal * goalPercent / 100.0);

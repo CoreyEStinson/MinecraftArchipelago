@@ -4,6 +4,7 @@ import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.minecraftarchipelago.APSession;
 import com.minecraftarchipelago.MinecraftArchipelago;
+import com.minecraftarchipelago.SlotData;
 import com.minecraftarchipelago.aplocations.CheckedLocationsState;
 import com.minecraftarchipelago.aplocations.LocationRegistry;
 import com.minecraftarchipelago.aplocations.BossKillLocationRegistry;
@@ -92,6 +93,16 @@ public final class APHudRenderer {
                     APHudState.bossKillsChecked++;
                 }
             }
+
+            APHudState.lootableChecksTotal = APSession.hasSlotData()
+                    ? APSession.getSlotData().getLootableChecks()
+                    : 0;
+
+            APHudState.lootableChecksFound = (server != null)
+                    ? CheckedLocationsState.get(server).countCheckedInRange(
+                    SlotData.LOOTABLE_CHECK_BASE_ID,
+                    SlotData.LOOTABLE_CHECK_BASE_ID + APHudState.lootableChecksTotal)
+                    : 0;
 
             // Advancements
             APHudState.advancementsChecked =
@@ -262,6 +273,28 @@ public final class APHudRenderer {
         cy += LINE;
         cy = separator(ctx, cx, cy + 2, x);
 
+        // ── Lootable Checks ───────────────────────────────────────────────────────
+        ctx.drawTextWithShadow(tr, "Lootable Checks", cx, cy += 2, COL_TITLE);
+        cy += LINE;
+
+        String lootCount = APHudState.lootableChecksFound
+                + " / " + APHudState.lootableChecksTotal;
+        ctx.drawTextWithShadow(tr, lootCount, cx + 4, cy, COL_WHITE);
+        cy += LINE;
+
+        int lootBarW  = PANEL_WIDTH - PAD * 2 - 4;
+        int lootFillW = APHudState.lootableChecksTotal > 0
+                ? (int)((float) APHudState.lootableChecksFound
+                / APHudState.lootableChecksTotal * lootBarW)
+                : 0;
+        int lootColor = (APHudState.lootableChecksTotal > 0
+                && APHudState.lootableChecksFound >= APHudState.lootableChecksTotal)
+                ? COL_BAR_WIN : COL_BAR_FILL;
+        ctx.fill(cx + 2, cy, cx + 2 + lootBarW, cy + BAR_HEIGHT, COL_BAR_BG);
+        if (lootFillW > 0) ctx.fill(cx + 2, cy, cx + 2 + lootFillW, cy + BAR_HEIGHT, lootColor);
+        cy += BAR_HEIGHT + 4;
+        cy = separator(ctx, cx, cy + 2, x);
+
         // ── Summary ────────────────────────────────────────────────────────────
         ctx.drawTextWithShadow(tr,
                 "Stages unlocked: " + APHudState.stagesUnlocked,
@@ -322,6 +355,12 @@ public final class APHudRenderer {
 
         h += LINE;       // stages line
         h += 5;          // separator
+
+        // Lootable checks section
+        h += 5;              // separator
+        h += LINE;           // header
+        h += LINE;           // count
+        h += BAR_HEIGHT + 4; // bar
         
         // Equipment section
         h += LINE + 2;   // "Armor Tier Unlocked:"
