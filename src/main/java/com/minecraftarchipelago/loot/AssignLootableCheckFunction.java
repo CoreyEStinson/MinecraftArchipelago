@@ -75,7 +75,6 @@ public class AssignLootableCheckFunction extends ConditionalLootFunction {
             ChestOpenHandler.requestScout(locationId);
         }
 
-        ArchipelagoCheckItem.setCustomData(stack, nbt);
         return stack;
     }
 

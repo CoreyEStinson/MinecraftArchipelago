@@ -174,7 +174,22 @@ public class APEvents {
 
     @ArchipelagoEventListener
     public void onLocationInfo(LocationInfoEvent e) {
-        System.out.println("Got location info: " + e);
+        MinecraftArchipelagoClient.LOGGER.info("[AP] Got location info for {} locations", e.locations.size());
+
+        MinecraftClient mc = MinecraftClient.getInstance();
+        if (mc == null) return;
+
+        mc.execute(() -> {
+            MinecraftServer server = mc.getServer();
+            if (server == null) return;
+
+            server.execute(() -> {
+                for (io.github.archipelagomw.parts.NetworkItem item : e.locations) {
+                    com.minecraftarchipelago.loot.LootableItemNameCache.put(item.locationID, item.itemName, item.playerName);
+                    com.minecraftarchipelago.loot.ChestOpenHandler.applyNameToAllMatchingItems(server, item.locationID);
+                }
+            });
+        });
     }
 
     @ArchipelagoEventListener

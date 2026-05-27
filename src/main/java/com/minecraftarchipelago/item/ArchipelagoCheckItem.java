@@ -206,7 +206,7 @@ public class ArchipelagoCheckItem extends Item {
                     true
             );
             stack.decrement(1);
-            return TypedActionResult.pass(stack);
+            return TypedActionResult.consume(stack);
         }
 
         // Not yet assigned
@@ -263,7 +263,7 @@ public class ArchipelagoCheckItem extends Item {
 
         // Consume the item
         stack.decrement(1);
-        return TypedActionResult.pass(stack);
+        return TypedActionResult.consume(stack);
     }
 
     private static int checkNumber(NbtCompound nbt) {

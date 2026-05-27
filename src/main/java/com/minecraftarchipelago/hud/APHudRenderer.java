@@ -106,7 +106,7 @@ public final class APHudRenderer {
 
             // Advancements
             APHudState.advancementsChecked =
-                    APHudState.locationsChecked;
+                    APHudState.locationsChecked - APHudState.bossKillsChecked - APHudState.lootableChecksFound;
             APHudState.advancementsTotal   =
                     APHudState.locationsTotal;
 
@@ -206,6 +206,7 @@ public final class APHudRenderer {
             ctx.drawTextWithShadow(tr, "Slot: " + APSession.slotName, cx + 4, cy, COL_WHITE);
         } else {
             ctx.drawTextWithShadow(tr, "○ Disconnected", cx, cy, COL_RED);
+            return;
         }
         cy += LINE;
         cy = separator(ctx, cx, cy + 2, x);
@@ -244,7 +245,7 @@ public final class APHudRenderer {
             cy += LINE;
         } else {
             int req       = APHudState.locationsRequired();
-            int remaining = APHudState.locationsRemaining();
+            int remaining = APHudState.locationsRemaining() + APHudState.bossKillsChecked + APHudState.lootableChecksFound;
             ctx.drawTextWithShadow(tr,
                     "Goal: " + APHudState.goalPercent + "% → " + req + " total",
                     cx + 4, cy, COL_DIM);
@@ -295,12 +296,6 @@ public final class APHudRenderer {
         cy += BAR_HEIGHT + 4;
         cy = separator(ctx, cx, cy + 2, x);
 
-        // ── Summary ────────────────────────────────────────────────────────────
-        ctx.drawTextWithShadow(tr,
-                "Stages unlocked: " + APHudState.stagesUnlocked,
-                cx + 4, cy, COL_DIM);
-        cy += LINE;
-        cy = separator(ctx, cx, cy + 2, x);
 
         // ── Equipment ──────────────────────────────────────────────────────────
         ctx.drawTextWithShadow(tr, "Armor Tier Unlocked:", cx, cy += 2, COL_TITLE);
@@ -332,42 +327,45 @@ public final class APHudRenderer {
 
     // Computes panel height based on current state
     private static int computeHeight() {
-        int h = PAD * 2;
-        h += LINE + 2;   // title
-        h += 5;          // separator
-        h += LINE;       // connection status
-        if (APHudState.connected) {
-            h += LINE;   // address
-            h += LINE;   // slot
+        int h = PAD; // Top padding
+
+        // Title
+        h += LINE + 2;
+        h += 4; // separator
+
+        // Connection
+        if (!APHudState.connected) {
+            return h + LINE + PAD;
         }
-        h += 5;          // separator
-        h += LINE;       // "Advancements" header
-        h += LINE;       // count
-        h += BAR_HEIGHT + 4;
-        h += APHudState.goalAchieved ? LINE : LINE * 2;
-        h += 5;          // separator
 
-        // Boss kills section
-        h += LINE;       // "Boss Kills" header
-        h += LINE * APHudState.bossKills.size();   // boss entries
-        h += LINE;       // kill counter
-        h += 5;          // separator
+        h += 2 + LINE * 3; // Connected text, address, slot
+        h += 6; // separator
 
-        h += LINE;       // stages line
-        h += 5;          // separator
+        // Advancements
+        h += 2 + LINE; // Header
+        h += LINE; // Count
+        h += BAR_HEIGHT + 4; // Bar
+        h += APHudState.goalAchieved ? LINE : (LINE * 2); // Goal text
+        h += 6; // separator
 
-        // Lootable checks section
-        h += 5;              // separator
-        h += LINE;           // header
-        h += LINE;           // count
-        h += BAR_HEIGHT + 4; // bar
-        
-        // Equipment section
-        h += LINE + 2;   // "Armor Tier Unlocked:"
-        h += LINE;       // armor tier
-        h += LINE;       // "Tool Tier Unlocked:"
-        h += LINE;       // tool tier
-        return h;
+        // Boss Kills
+        h += 2 + LINE; // Header
+        h += LINE * APHudState.bossKills.size(); // Entries
+        h += LINE; // Kill counter
+        h += 6; // separator
+
+        // Lootable Checks
+        h += 2 + LINE; // Header
+        h += LINE; // Count
+        h += BAR_HEIGHT + 4; // Bar
+        h += 6; // separator
+
+        // Equipment
+        h += 2 + LINE; // Armor header
+        h += LINE;     // Armor tier
+        h += LINE;     // Tool header
+
+        return h + LINE + PAD; // Tool tier + bottom padding
     }
 
     // Position persistence
