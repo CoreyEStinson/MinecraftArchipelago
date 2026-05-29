@@ -1,62 +1,59 @@
 package com.minecraftarchipelago.aplocations;
 
 import com.minecraftarchipelago.APSession;
+import com.minecraftarchipelago.SlotData;
+import com.minecraftarchipelago.victory.VictoryConditionRegistry;
 import io.github.archipelagomw.ClientStatus;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.text.Text;
+import net.minecraft.util.Formatting;
 
-public class VictoryCondition {
+public final class VictoryCondition {
 
     /**
-     * Called after each new location check and on reconnect.
-     * Fires goalAchieved() to AP if the threshold is met for the first time.
-     * Must be called on the server thread
+     * Called every time a location is checked (advancements, boss kills,
+     * lootable claims). Evaluates all registered win conditions and fires
+     * goalAchieved() on the AP client if all are satisfied.
      */
-    public static void checkAndAward(MinecraftServer server){
-        if (!APSession.hasSlotData()) return;;
-        if (!APSession.CLIENT.isConnected()) return;
+    public static void checkAndAward(MinecraftServer server) {
+        if (!APSession.hasSlotData()) return;
 
         CheckedLocationsState state = CheckedLocationsState.get(server);
-        if (state.isGoalAchieved()) return; // already won, nothing to do
+        if (state.isGoalAchieved()) return;  // already won, nothing to do
 
-        int total = LocationRegistry.size();
-        if (total == 0) return;
+        SlotData slotData = APSession.getSlotData();
 
-        int checked = state.checkedCount();
-        int goalPercent = APSession.getSlotData().getAdvancementGoalPercent();
+        if (!VictoryConditionRegistry.allMet(server, state, slotData)) return;
 
-        if (checked * 100 < total * goalPercent) return;;
+        // ── All conditions satisfied ──────────────────────────────────────────
+        state.markGoalAchieved();
 
-        // Threshold met - mark it first to prevent double firing
-        boolean wasNew = state.markGoalAchieved();
-        if (!wasNew) return;
+        MinecraftClient.getInstance().execute(() ->
+                APSession.CLIENT.setGameState(ClientStatus.CLIENT_GOAL)
+        );
 
-        int finalChecked = checked;
-        MinecraftClient.getInstance().execute(() -> {
-            APSession.CLIENT.setGameState(ClientStatus.CLIENT_GOAL);
-
-            var player = MinecraftClient.getInstance().player;
-            if (player != null) {
-                player.sendMessage(Text.literal(
-                        "[AP] Goal achieved! Completed " + finalChecked
-                        + "/" + total + " locations (" + goalPercent + "% required). You win!"
-                ));
-            }
-        });
+        server.getPlayerManager().broadcast(
+                Text.empty()
+                        .append(Text.literal("⚡ ").formatted(Formatting.YELLOW))
+                        .append(Text.literal("Goal achieved! ")
+                                .formatted(Formatting.GOLD, Formatting.BOLD))
+                        .append(Text.literal("Sending victory to Archipelago...")
+                                .formatted(Formatting.YELLOW)),
+                false
+        );
     }
 
     /**
-     * Called on reconnect if the goal was already achieved in a previous
-     * session. Silently resends the status without chat
+     * Called when the player reconnects to AP.
+     * Resends the goal-achieved signal if it was already earned this session.
      */
-    public static void resendIfAchieved(MinecraftServer server){
-        if (!APSession.CLIENT.isConnected()) return;
+    public static void resendIfAchieved(MinecraftServer server) {
+        if (!CheckedLocationsState.get(server).isGoalAchieved()) return;
 
-        CheckedLocationsState state = CheckedLocationsState.get(server);
-        if (!state.isGoalAchieved()) return;
-
-        APSession.CLIENT.setGameState(ClientStatus.CLIENT_GOAL);
+        MinecraftClient.getInstance().execute(() ->
+                APSession.CLIENT.setGameState(ClientStatus.CLIENT_GOAL)
+        );
     }
 
     private VictoryCondition() {}

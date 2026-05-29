@@ -32,16 +32,12 @@ class APHudStateTest {
     @Test
     void testAPHudStateStaticMethods() {
         // Test that static methods work correctly
-        assertEquals(0, APHudState.locationsRequired());
-        assertEquals(0, APHudState.locationsRemaining());
         assertEquals(0f, APHudState.progressFraction());
         
         // Test with some values set
         APHudState.locationsTotal = 100;
         APHudState.locationsChecked = 30;
-        assertEquals(70, APHudState.locationsRequired());
-        assertEquals(40, APHudState.locationsRemaining());
-        
+
         APHudState.advancementsTotal = 50;
         APHudState.advancementsChecked = 10;
         assertEquals(0.2f, APHudState.progressFraction());

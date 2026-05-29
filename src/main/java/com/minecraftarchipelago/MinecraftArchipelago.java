@@ -13,6 +13,10 @@ import com.minecraftarchipelago.item.ModItems;
 import com.minecraftarchipelago.loot.APLootTableModifier;
 import com.minecraftarchipelago.loot.AssignLootableCheckFunction;
 import com.minecraftarchipelago.loot.ChestOpenHandler;
+import com.minecraftarchipelago.victory.AdvancementGoalChecker;
+import com.minecraftarchipelago.victory.BossKillsChecker;
+import com.minecraftarchipelago.victory.LootableChecksChecker;
+import com.minecraftarchipelago.victory.VictoryConditionRegistry;
 import net.fabricmc.api.ModInitializer;
 
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
@@ -47,6 +51,11 @@ public class MinecraftArchipelago implements ModInitializer {
 				Identifier.of("minecraftarchipelago", "assign_lootable_check"),
 				AssignLootableCheckFunction.TYPE
 		);
+
+		// --- Win condition checkers (order determines HUD display order) ---
+		VictoryConditionRegistry.register(new AdvancementGoalChecker());
+		VictoryConditionRegistry.register(new BossKillsChecker());
+		VictoryConditionRegistry.register(new LootableChecksChecker());
 
 		ModItems.register();
 		APLootTableModifier.register();
