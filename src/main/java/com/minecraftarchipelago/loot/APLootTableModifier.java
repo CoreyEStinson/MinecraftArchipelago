@@ -13,7 +13,7 @@ import java.util.Set;
 public class APLootTableModifier {
 
     /** Probability than an AP check item appears in any given chest roll */
-    private static final float SPAWN_CHANCE = 1f;
+    private static final float SPAWN_CHANCE = 0.33f;
 
     /** All loot tables that may contain an Archipelago check item */
     private static final Set<Identifier> LOOT_TABLES = Set.of(
