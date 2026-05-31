@@ -4,6 +4,8 @@ import com.minecraftarchipelago.SlotData;
 import com.minecraftarchipelago.aplocations.CheckedLocationsState;
 import net.minecraft.server.MinecraftServer;
 
+import java.util.List;
+
 public interface VictoryConditionChecker {
 
     /**
@@ -35,4 +37,14 @@ public interface VictoryConditionChecker {
     VictoryProgress getProgress(MinecraftServer server,
                                 CheckedLocationsState state,
                                 SlotData slotData);
+
+    /**
+     * Returns the display names of items or objectives still needed to complete
+     * this condition.
+     */
+    default List<String> getRemainingDetails(MinecraftServer server,
+                                             CheckedLocationsState checkedState,
+                                             SlotData slotData) {
+        return List.of();
+    }
 }

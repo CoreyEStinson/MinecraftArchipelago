@@ -4,19 +4,22 @@ import com.minecraftarchipelago.apitems.APItemsReloadListener;
 import com.minecraftarchipelago.aplocations.APBossKillLocationsReloadListener;
 import com.minecraftarchipelago.aplocations.APLocationsReloadListener;
 import com.minecraftarchipelago.aplocations.BossKillListener;
+import com.minecraftarchipelago.aplocations.VictoryCondition;
 import com.minecraftarchipelago.apstages.APStagesReloadListener;
 import com.minecraftarchipelago.apstages.command.StageCommands;
 import com.minecraftarchipelago.apstages.item.ItemStageEnforcer;
 import com.minecraftarchipelago.apstages.service.StageUnlockApplier;
 import com.minecraftarchipelago.apstages.state.StageUnlockState;
+import com.minecraftarchipelago.collections.ItemCollection;
+import com.minecraftarchipelago.collections.ItemCollectionRegistry;
+import com.minecraftarchipelago.hud.APHudRenderer;
+import com.minecraftarchipelago.hud.APHudState;
+import com.minecraftarchipelago.hud.APWinConditionsRenderer;
 import com.minecraftarchipelago.item.ModItems;
 import com.minecraftarchipelago.loot.APLootTableModifier;
 import com.minecraftarchipelago.loot.AssignLootableCheckFunction;
 import com.minecraftarchipelago.loot.ChestOpenHandler;
-import com.minecraftarchipelago.victory.AdvancementGoalChecker;
-import com.minecraftarchipelago.victory.BossKillsChecker;
-import com.minecraftarchipelago.victory.LootableChecksChecker;
-import com.minecraftarchipelago.victory.VictoryConditionRegistry;
+import com.minecraftarchipelago.victory.*;
 import net.fabricmc.api.ModInitializer;
 
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
@@ -56,6 +59,12 @@ public class MinecraftArchipelago implements ModInitializer {
 		VictoryConditionRegistry.register(new AdvancementGoalChecker());
 		VictoryConditionRegistry.register(new BossKillsChecker());
 		VictoryConditionRegistry.register(new LootableChecksChecker());
+		for (ItemCollection collection : ItemCollectionRegistry.getAll()) {
+			VictoryConditionRegistry.register(new ItemCollectionChecker(collection));
+		}
+
+		APHudRenderer.register();
+		APWinConditionsRenderer.register();
 
 		ModItems.register();
 		APLootTableModifier.register();

@@ -221,10 +221,12 @@ public class APEvents {
 
     @ArchipelagoEventListener
     public void onPrint(PrintJSONEvent e){
-        String msg = e.apPrint.getPlainText();
-        MinecraftClient.getInstance().execute(() ->{
+        int itemFlags = (e.item != null) ? e.item.flags : -1;
+
+        Text message = APMessageFormatter.build(e.apPrint.getPlainText(), itemFlags);
+        MinecraftClient.getInstance().execute(() -> {
             var player = MinecraftClient.getInstance().player;
-            if (player != null) player.sendMessage(Text.literal("[AP] " + msg));
+            if (player != null) player.sendMessage(message);
         });
     }
 

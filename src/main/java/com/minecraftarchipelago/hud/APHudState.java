@@ -6,6 +6,7 @@ import java.util.*;
 public final class APHudState {
 
     public static boolean visible = true;
+    public static boolean winConditionsVisible = false;
 
     // --- Connection ---
     public static boolean connected = false;
@@ -36,6 +37,10 @@ public final class APHudState {
 
     // --- Win conditions (populated from VictoryConditionRegistry each tick) ---
     public static List<VictoryProgress> activeConditions = new ArrayList<>();
+
+    // --- Collection details view ---
+    public static Map<String, List<String>> collectionRemainingItems = new LinkedHashMap<>();
+    public static boolean expandedView = false; // toggled by the detail keybind
 
     // --- Equipment ---
     public static int    stagesUnlocked = 0;

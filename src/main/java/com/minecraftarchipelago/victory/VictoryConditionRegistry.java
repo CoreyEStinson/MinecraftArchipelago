@@ -4,9 +4,7 @@ import com.minecraftarchipelago.SlotData;
 import com.minecraftarchipelago.aplocations.CheckedLocationsState;
 import net.minecraft.server.MinecraftServer;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
 public class VictoryConditionRegistry {
 
@@ -68,6 +66,25 @@ public class VictoryConditionRegistry {
             if (checker.isEnabled(slotData)) count++;
         }
         return count;
+    }
+
+    /**
+     * Computes remaining details for every active condition that overrides
+     * getRemainingDetails(). Returns a map from condition label -> remaining names.
+     */
+    public static Map<String, List<String>> getRemainingDetails(MinecraftServer server,
+                                                                CheckedLocationsState state,
+                                                                SlotData slotData) {
+        Map<String, List<String>> result = new LinkedHashMap<>();
+        for (VictoryConditionChecker checker : CHECKERS) {
+            if (!checker.isEnabled(slotData)) continue;
+            List<String> details = checker.getRemainingDetails(server, state, slotData);
+            if (!details.isEmpty()) {
+                VictoryProgress prog = checker.getProgress(server, state, slotData);
+                result.put(prog.label(), details);
+            }
+        }
+        return result;
     }
 
     private VictoryConditionRegistry() {}

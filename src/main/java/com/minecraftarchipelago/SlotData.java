@@ -22,6 +22,7 @@ public final class SlotData {
     private final int lootableChecks;
     private final Set<String> requiredBossKills;
     private final int requiredLootableChecks;
+    private final Set<String> requiredItemCollections;
 
 
     // --- Constructor ---
@@ -29,12 +30,14 @@ public final class SlotData {
                      boolean deathLink,
                      int lootableChecks,
                      Set<String> requiredBossKills,
-                     int requiredLootableChecks) {
+                     int requiredLootableChecks,
+                     Set<String> requiredItemCollections) {
         this.advancementGoalPercent = advancementGoalPercent;
         this.deathLink = deathLink;
         this.lootableChecks = lootableChecks;
-        this.requiredBossKills = requiredBossKills;
+        this.requiredBossKills = Collections.unmodifiableSet(requiredBossKills);
         this.requiredLootableChecks = requiredLootableChecks;
+        this.requiredItemCollections = Collections.unmodifiableSet(requiredItemCollections);
     }
 
     // --- Getters ---
@@ -43,6 +46,7 @@ public final class SlotData {
     public int         getLootableChecks()           { return lootableChecks; }
     public Set<String> getRequiredBossKills()        { return requiredBossKills; }
     public int         getRequiredLootableChecks()   { return requiredLootableChecks; }
+    public Set<String> getRequiredItemCollections()  { return requiredItemCollections; }
 
     // --- Win condition helpers ---
 
@@ -64,6 +68,11 @@ public final class SlotData {
     /** True if the named boss is required for the boss kill win condition. */
     public boolean isBossRequired(String bossName) {
         return requiredBossKills.contains(bossName);
+    }
+
+    /** True if the named collection is required for this game. */
+    public boolean isCollectionRequired(String collectionId) {
+        return requiredItemCollections.contains(collectionId);
     }
 
     /**
@@ -124,7 +133,9 @@ public final class SlotData {
         }
         reqLootable = Math.max(0, Math.min(lootable, reqLootable));
 
-        return new SlotData(goal, deathLink, lootable, requiredBosses, reqLootable);
+        Set<String> requiredCollections = getStringSet(raw, "required_item_collections");
+
+        return new SlotData(goal, deathLink, lootable, requiredBosses, reqLootable, requiredCollections);
     }
 
     // --- Helper methods ---
@@ -156,11 +167,12 @@ public final class SlotData {
     @Override
     public String toString() {
         return "SlotData{"
-                + "advancementGoal=" + advancementGoalPercent
-                + ", deathLink=" + deathLink
-                + ", lootableChecks=" + lootableChecks
-                + ", requiredBossKills=" + requiredBossKills
+                + "advancementGoal="         + advancementGoalPercent
+                + ", deathLink="             + deathLink
+                + ", lootableChecks="        + lootableChecks
+                + ", requiredBossKills="     + requiredBossKills
                 + ", requiredLootableChecks=" + requiredLootableChecks
+                + ", requiredItemCollections=" + requiredItemCollections
                 + "}";
     }
 }

@@ -28,6 +28,8 @@ import org.lwjgl.glfw.GLFW;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Set;
 
 public final class APHudRenderer {
@@ -125,17 +127,6 @@ public final class APHudRenderer {
         // ── Goal percent (for advancement bar marker) ─────────────────────────
         if (APSession.hasSlotData()) {
             APHudState.goalPercent = APSession.getSlotData().getAdvancementGoalPercent();
-        }
-
-        // ── Win conditions (from registry) ────────────────────────────────────
-        if (APSession.hasSlotData()) {
-            APHudState.activeConditions = new ArrayList<>(
-                    VictoryConditionRegistry.getActiveProgress(
-                            server, locs, APSession.getSlotData()
-                    )
-            );
-        } else {
-            APHudState.activeConditions = new ArrayList<>();
         }
 
         // ── Equipment ─────────────────────────────────────────────────────────
@@ -281,37 +272,6 @@ public final class APHudRenderer {
             cy += BAR_HEIGHT + 4;
         }
 
-        // ── Win Conditions (only when active conditions exist) ────────────────
-        if (!APHudState.activeConditions.isEmpty()) {
-            cy = separator(ctx, cx, cy + 2, x);
-            ctx.drawTextWithShadow(tr, "Win Conditions", cx, cy += 2, COL_TITLE);
-            cy += LINE;
-
-            for (VictoryProgress cond : APHudState.activeConditions) {
-                String icon      = cond.met() ? "✓" : "✗";
-                int    iconColor = cond.met() ? COL_GREEN : COL_RED;
-                String counts    = cond.current() + "/" + cond.required();
-
-                // Label + icon on left, counts on right
-                ctx.drawTextWithShadow(tr, icon, cx + 2, cy, iconColor);
-                ctx.drawTextWithShadow(tr, cond.label(), cx + 14, cy,
-                        cond.met() ? COL_DIM : COL_WHITE);
-                ctx.drawTextWithShadow(tr, counts,
-                        x + PANEL_WIDTH - PAD - tr.getWidth(counts), cy, COL_DIM);
-                cy += LINE;
-
-                // Bar fills to current/required
-                int condFill = cond.required() > 0
-                        ? (int)(cond.barFraction() * barW) : 0;
-                int condCol  = cond.met() ? COL_BAR_WIN : COL_BAR_FILL;
-                ctx.fill(barX, cy, barX + barW, cy + BAR_HEIGHT, COL_BAR_BG);
-                if (condFill > 0)
-                    ctx.fill(barX, cy, barX + condFill, cy + BAR_HEIGHT, condCol);
-
-                cy += BAR_HEIGHT + 4;
-            }
-        }
-
         // ── Equipment ─────────────────────────────────────────────────────────
         cy = separator(ctx, cx, cy + 2, x);
         ctx.drawTextWithShadow(tr, "Armor:", cx, cy += 2, COL_TITLE);
@@ -347,16 +307,6 @@ public final class APHudRenderer {
         if (APHudState.lootableChecksTotal > 0) {
             h += 6;                           // separator
             h += 2 + LINE + LINE + BAR_HEIGHT + 4; // header + count + bar
-        }
-
-        // Win conditions — only if any active
-        if (!APHudState.activeConditions.isEmpty()) {
-            h += 6;           // separator
-            h += 2 + LINE;    // header
-            for (VictoryProgress ignored : APHudState.activeConditions) {
-                h += LINE;            // label row
-                h += BAR_HEIGHT + 4;  // bar row
-            }
         }
 
         // Equipment (separator + armor + tools = separator + 4 lines)
@@ -450,7 +400,7 @@ public final class APHudRenderer {
     }
 
     private static int[] handleDrag(MinecraftClient client, int px, int py, int h) {
-        if (client.currentScreen != null) { prevMouseBtn = false; return new int[]{px, py}; }
+        if (client.mouse.isCursorLocked()) { prevMouseBtn = false; return new int[]{px, py}; }
 
         long    handle    = client.getWindow().getHandle();
         boolean mouseDown = GLFW.glfwGetMouseButton(handle, GLFW.GLFW_MOUSE_BUTTON_LEFT) == GLFW.GLFW_PRESS;
