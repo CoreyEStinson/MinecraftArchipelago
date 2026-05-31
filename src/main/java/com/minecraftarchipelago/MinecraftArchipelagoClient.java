@@ -128,31 +128,31 @@ public class MinecraftArchipelagoClient implements ClientModInitializer
                                     joinAp(source, address, port, slot, password);
                                     return 0;
                                 })
-                                )
                             )
                         )
-
                     )
-                    .then(ClientCommandManager.literal("leave").executes(ctx -> {
-                        APSession.CLIENT.close();
-                        APSession.clearSlotData();
-                        ctx.getSource().sendFeedback(Text.literal("Disconnected from Archipelago."));
+                )
+            )
+            .then(ClientCommandManager.literal("leave").executes(ctx -> {
+                APSession.CLIENT.close();
+                APSession.clearSlotData();
+                ctx.getSource().sendFeedback(Text.literal("Disconnected from Archipelago."));
 
-                        MinecraftServer server = ctx.getSource().getClient().getServer();
-                        if (server != null){
-                            server.execute(() -> APConnectionState.get(server).clear());
-                        }
-                        return 0;
-                    }))
-                    .then(ClientCommandManager.literal("status").executes(ctx -> {
-                        boolean c = APSession.CLIENT.isConnected();
-                        String addr = APSession.CLIENT.getConnectedAddress();
-                        ctx.getSource().sendFeedback(Text.literal(
-                                c ? ("Connected to " + addr) : "Not connected."
-                        ));
-                        return 0;
-                    }))
-            ));
+                MinecraftServer server = ctx.getSource().getClient().getServer();
+                if (server != null){
+                    server.execute(() -> APConnectionState.get(server).clear());
+                }
+                return 0;
+            }))
+            .then(ClientCommandManager.literal("status").executes(ctx -> {
+                boolean c = APSession.CLIENT.isConnected();
+                String addr = APSession.CLIENT.getConnectedAddress();
+                ctx.getSource().sendFeedback(Text.literal(
+                        c ? ("Connected to " + addr) : "Not connected."
+                ));
+                return 0;
+            }))
+            );
         });
         ClientSendMessageEvents.CHAT.register(message -> {
             // Only forward messages if there is an AP session connected
