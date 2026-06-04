@@ -1,6 +1,5 @@
 package com.minecraftarchipelago;
 
-
 import com.minecraftarchipelago.apitems.APGiveItemRegistry;
 import com.minecraftarchipelago.apitems.APItemRegistry;
 import com.minecraftarchipelago.aplocations.CheckedLocationsState;
@@ -8,7 +7,6 @@ import com.minecraftarchipelago.aplocations.VictoryCondition;
 import com.minecraftarchipelago.apstages.service.StageUnlockApplier;
 import com.minecraftarchipelago.apstages.state.StageUnlockState;
 import io.github.archipelagomw.events.*;
-import net.minecraft.client.MinecraftClient;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.registry.Registries;
@@ -24,78 +22,39 @@ import java.util.Map;
 public class APEvents {
 
     @ArchipelagoEventListener
-    public void onConnected(ConnectionResultEvent e){
-        // e.slotData is the raw map from the APWorld's generate() method.
-        // Verify the exact field name against the Java client library.
+    public void onConnected(ConnectionResultEvent e) {
         SlotData data = SlotData.parse(e.getSlotData(Map.class));
         APSession.setSlotData(data);
 
-        // Enable Death Link tag on the AP connection if the option is on.
         if (data.isDeathLinkEnabled()) {
-            APSession.CLIENT.setDeathLinkEnabled(true);
+            APSession.client().setDeathLinkEnabled(true);
         }
 
-        MinecraftArchipelagoClient.LOGGER.info(
+        MinecraftArchipelago.LOGGER.info(
                 "[AP] Connected. Slot data received: {}", data);
 
-        // Show confirmation in game chat
-        MinecraftClient.getInstance().execute(() -> {
-            // Persist credentials for auto-reconnect on next world load
-            MinecraftServer server = MinecraftClient.getInstance().getServer();
-            if (server != null) {
-                server.execute(() -> {
-                    APConnectionState.get(server).save(
-                            APSession.getPendingHost(),
-                            APSession.getPendingPort(),
-                            APSession.getPendingSlot(),
-                            APSession.getPendingPassword()
-                    );
-                });
+        APSession.runtime().executeOnClient(() -> {
+            MinecraftServer currentServer = APSession.runtime().getCurrentServer();
+            if (currentServer != null) {
+                currentServer.execute(() -> APConnectionState.get(currentServer).save(
+                        APSession.getPendingHost(),
+                        APSession.getPendingPort(),
+                        APSession.getPendingSlot(),
+                        APSession.getPendingPassword()
+                ));
             }
 
-            var player = MinecraftClient.getInstance().player;
-            if (player != null){
+            var player = APSession.runtime().getCurrentPlayer();
+            if (player != null) {
                 String msg = "[AP] Connected! Goal: " + data.getAdvancementGoalPercent() + "% of advancements.";
                 if (data.isDeathLinkEnabled()) msg += " Death Link is ON";
                 player.sendMessage(Text.literal(msg));
             }
         });
 
-        // Resend all previously checked locations so the AP server
-        // knows what we're already done. Without this, if you reconnect
-        // mid-game the server thinks you've checked nothing
-        MinecraftServer server = MinecraftClient.getInstance().getServer();
-        if (server == null) return;;
-        server.execute(() -> {
-            CheckedLocationsState state = CheckedLocationsState.get(server);
-            var allChecked = state.getAllChecked();
-
-            if (allChecked.isEmpty()) return;
-
-            MinecraftArchipelagoClient.LOGGER.info(
-                    "[AP] Resending {} previously check locations.", allChecked.size());
-
-            // Sync missing advancements
-            ServerPlayerEntity player = server.getPlayerManager().getPlayerList().isEmpty() ? null : server.getPlayerManager().getPlayerList().getFirst();
-            if (player != null) {
-                net.minecraft.advancement.PlayerAdvancementTracker tracker = player.getAdvancementTracker();
-                for (net.minecraft.advancement.AdvancementEntry adv : server.getAdvancementLoader().getAdvancements()) {
-                    if (tracker.getProgress(adv).isDone()) {
-                        Long locId = com.minecraftarchipelago.aplocations.LocationRegistry.getLocationId(adv.id());
-                        if (locId != null && state.checkLocation(locId)) {
-                            allChecked = state.getAllChecked(); // Update referenced Set
-                        }
-                    }
-                }
-            }
-
-            for (long locationId : allChecked){
-                APSession.CLIENT.checkLocation(locationId);
-            }
-
-            // If goal was already achieved in a previous session, silently resend
-            VictoryCondition.resendIfAchieved(server);
-        });
+        MinecraftServer server = APSession.runtime().getCurrentServer();
+        if (server == null) return;
+        server.execute(() -> resendCheckedLocationsOnConnect(server));
     }
 
     @ArchipelagoEventListener
@@ -104,83 +63,34 @@ public class APEvents {
         int itemIndex = (int) e.getIndex();
 
         if (itemId == null) {
-            MinecraftArchipelagoClient.LOGGER.warn("[AP] Received item with null ID, skipping");
+            MinecraftArchipelago.LOGGER.warn("[AP] Received item with null ID, skipping");
             return;
         }
-        long apItemId = itemId;
-        MinecraftArchipelagoClient.LOGGER.info("[AP] Item received, ID: {}", apItemId);
 
-        MinecraftClient mc = MinecraftClient.getInstance();
-        mc.execute(() -> {
-            MinecraftServer server = mc.getServer();
-            if (server == null) return;
+        long apItemId = itemId;
+        MinecraftArchipelago.LOGGER.info("[AP] Item received, ID: {}", apItemId);
+
+        APSession.runtime().executeOnClient(() -> {
+            MinecraftServer server = APSession.runtime().getCurrentServer();
+            var currentPlayer = APSession.runtime().getCurrentPlayer();
+            if (server == null || currentPlayer == null) return;
 
             server.execute(() -> {
-                if (mc.player == null) return;
-                String playerName = mc.player.getName().getString();
                 ServerPlayerEntity serverPlayer =
-                        server.getPlayerManager().getPlayer(playerName);
+                        server.getPlayerManager().getPlayer(currentPlayer.getName().getString());
                 if (serverPlayer == null) return;
 
-                CheckedLocationsState checkedState = CheckedLocationsState.get(server);
-                if (!checkedState.isNewItem(itemIndex)) {
-                    MinecraftArchipelagoClient.LOGGER.info("[AP] → index {} already processed, skipping", itemIndex);
-                    return;
-                }
-
-                // Case 1: filler give item — give directly, no stage needed
-                if (APGiveItemRegistry.isGiveItem(apItemId)) {
-                    MinecraftArchipelagoClient.LOGGER.info("[AP] → give item found");
-                    var entry = APGiveItemRegistry.getEntry(apItemId);
-                    Item item = Registries.ITEM.get(entry.itemId());
-                    ItemStack stack = new ItemStack(item, entry.count());
-                    if (!serverPlayer.getInventory().insertStack(stack)) {
-                        serverPlayer.dropItem(stack, false);
-                    }
-
-                    serverPlayer.playSoundToPlayer(SoundEvents.ENTITY_EXPERIENCE_ORB_PICKUP, SoundCategory.PLAYERS, 1.0f, 1.0f);
-
-                    return;
-                }
-
-                StageUnlockState state = StageUnlockState.get(server);
-
-                // Case 2: progressive item — find and apply the next unlocked tier
-                if (APItemRegistry.isProgressive(apItemId)) {
-                    MinecraftArchipelagoClient.LOGGER.info("[AP] → progressive item found");
-                    Identifier stageId = APItemRegistry.getNextTier(
-                            apItemId,
-                            state.getUnlocked(serverPlayer.getUuid())
-                    );
-                    if (stageId == null) return; // all tiers already unlocked
-
-                    if (state.unlock(serverPlayer.getUuid(), stageId)) {
-                        StageUnlockApplier.apply(serverPlayer, stageId);
-                    }
-                    return;
-                }
-
-                // Case 3: standard unlock or gamerule item
-                Identifier stageId = APItemRegistry.getStageId(apItemId);
-                MinecraftArchipelagoClient.LOGGER.info("[AP] → stage lookup result: {}", stageId);
-                if (stageId == null) return;
-
-                if (state.unlock(serverPlayer.getUuid(), stageId)) {
-                    StageUnlockApplier.apply(serverPlayer, stageId);
-                }
+                handleReceivedItem(server, serverPlayer, apItemId, itemIndex);
             });
         });
     }
 
     @ArchipelagoEventListener
     public void onLocationInfo(LocationInfoEvent e) {
-        MinecraftArchipelagoClient.LOGGER.info("[AP] Got location info for {} locations", e.locations.size());
+        MinecraftArchipelago.LOGGER.info("[AP] Got location info for {} locations", e.locations.size());
 
-        MinecraftClient mc = MinecraftClient.getInstance();
-        if (mc == null) return;
-
-        mc.execute(() -> {
-            MinecraftServer server = mc.getServer();
+        APSession.runtime().executeOnClient(() -> {
+            MinecraftServer server = APSession.runtime().getCurrentServer();
             if (server == null) return;
 
             server.execute(() -> {
@@ -199,10 +109,10 @@ public class APEvents {
 
     @ArchipelagoEventListener
     public void onCheckedLocations(CheckedLocationsEvent e) {
-        MinecraftClient mc = MinecraftClient.getInstance();
-        mc.execute(() -> {
-            MinecraftServer server = mc.getServer();
+        APSession.runtime().executeOnClient(() -> {
+            MinecraftServer server = APSession.runtime().getCurrentServer();
             if (server == null) return;
+
             server.execute(() -> {
                 CheckedLocationsState state = CheckedLocationsState.get(server);
                 boolean changed = false;
@@ -212,7 +122,7 @@ public class APEvents {
                     }
                 }
                 if (changed) {
-                    MinecraftArchipelagoClient.LOGGER.info("[AP] Updated checked locations from server sync.");
+                    MinecraftArchipelago.LOGGER.info("[AP] Updated checked locations from server sync.");
                     VictoryCondition.checkAndAward(server);
                 }
             });
@@ -220,51 +130,127 @@ public class APEvents {
     }
 
     @ArchipelagoEventListener
-    public void onPrint(PrintJSONEvent e){
+    public void onPrint(PrintJSONEvent e) {
         int itemFlags = (e.item != null) ? e.item.flags : -1;
 
         Text message = APMessageFormatter.build(e.apPrint.getPlainText(), itemFlags);
-        MinecraftClient.getInstance().execute(() -> {
-            var player = MinecraftClient.getInstance().player;
+        APSession.runtime().executeOnClient(() -> {
+            var player = APSession.runtime().getCurrentPlayer();
             if (player != null) player.sendMessage(message);
         });
     }
 
     @ArchipelagoEventListener
-    public void onDeathLink(DeathLinkEvent e){
+    public void onDeathLink(DeathLinkEvent e) {
         String source = e.source;
 
-        MinecraftClient mc = MinecraftClient.getInstance();
-        mc.execute(() -> {
-            MinecraftServer server = mc.getServer();
-            if (server == null) return;
+        APSession.runtime().executeOnClient(() -> {
+            MinecraftServer server = APSession.runtime().getCurrentServer();
+            var currentPlayer = APSession.runtime().getCurrentPlayer();
+            if (server == null || currentPlayer == null) return;
 
             server.execute(() -> {
-                if (mc.player == null) return;
                 ServerPlayerEntity player =
-                        server.getPlayerManager().getPlayer(mc.player.getName().getString());
-                if (player == null || player.isDead()) return;
-
-                // Flag to prevent the death from triggering another send
-                DeathLinkHandler.setReceivingDeathLink(true);
-
-                // Kill the player with void damage
-                player.damage(
-                        player.getDamageSources().outOfWorld(),
-                        Float.MAX_VALUE
-                );
-
-                DeathLinkHandler.setReceivingDeathLink(false);
-
-                // Show who send the death
-                mc.execute(() -> {
-                    if (mc.player != null) {
-                        mc.player.sendMessage(
-                                Text.literal("[AP] Death Link received. Sent by " + source)
-                        );
-                    }
-                });
+                        server.getPlayerManager().getPlayer(currentPlayer.getName().getString());
+                DeathLinkHandler.applyReceivedDeathLink(player, source);
             });
         });
+    }
+
+    static void handleReceivedItem(MinecraftServer server,
+                                   ServerPlayerEntity serverPlayer,
+                                   long apItemId,
+                                   int itemIndex) {
+        ReceivedItemDecision decision = decideReceivedItem(server, serverPlayer.getUuid(), apItemId, itemIndex);
+        if (decision.duplicate()) {
+            MinecraftArchipelago.LOGGER.info("[AP] -> index {} already processed, skipping", itemIndex);
+            return;
+        }
+
+        if (decision.giveEntry() != null) {
+            MinecraftArchipelago.LOGGER.info("[AP] -> give item found");
+            Item item = Registries.ITEM.get(decision.giveEntry().itemId());
+            ItemStack stack = new ItemStack(item, decision.giveEntry().count());
+            if (!serverPlayer.getInventory().insertStack(stack)) {
+                serverPlayer.dropItem(stack, false);
+            }
+
+            serverPlayer.playSoundToPlayer(
+                    SoundEvents.ENTITY_EXPERIENCE_ORB_PICKUP,
+                    SoundCategory.PLAYERS,
+                    1.0f,
+                    1.0f
+            );
+            return;
+        }
+
+        if (decision.stageId() != null) {
+            StageUnlockState state = StageUnlockState.get(server);
+            if (state.unlock(serverPlayer.getUuid(), decision.stageId())) {
+                StageUnlockApplier.apply(serverPlayer, decision.stageId());
+            }
+        }
+    }
+
+    static ReceivedItemDecision decideReceivedItem(MinecraftServer server,
+                                                   java.util.UUID playerId,
+                                                   long apItemId,
+                                                   int itemIndex) {
+        CheckedLocationsState checkedState = CheckedLocationsState.get(server);
+        if (!checkedState.isNewItem(itemIndex)) {
+            return new ReceivedItemDecision(true, null, null);
+        }
+
+        if (APGiveItemRegistry.isGiveItem(apItemId)) {
+            return new ReceivedItemDecision(false, APGiveItemRegistry.getEntry(apItemId), null);
+        }
+
+        if (APItemRegistry.isProgressive(apItemId)) {
+            StageUnlockState state = StageUnlockState.get(server);
+            Identifier stageId = APItemRegistry.getNextTier(apItemId, state.getUnlocked(playerId));
+            MinecraftArchipelago.LOGGER.info("[AP] -> progressive item found");
+            return new ReceivedItemDecision(false, null, stageId);
+        }
+
+        Identifier stageId = APItemRegistry.getStageId(apItemId);
+        MinecraftArchipelago.LOGGER.info("[AP] -> stage lookup result: {}", stageId);
+        return new ReceivedItemDecision(false, null, stageId);
+    }
+
+    static void resendCheckedLocationsOnConnect(MinecraftServer server) {
+        CheckedLocationsState state = CheckedLocationsState.get(server);
+
+        if (!state.getAllChecked().isEmpty()) {
+            MinecraftArchipelago.LOGGER.info(
+                    "[AP] Resending {} previously check locations.",
+                    state.getAllChecked().size()
+            );
+        }
+
+        ServerPlayerEntity player = server.getPlayerManager().getPlayerList().isEmpty()
+                ? null
+                : server.getPlayerManager().getPlayerList().getFirst();
+        if (player != null) {
+            net.minecraft.advancement.PlayerAdvancementTracker tracker = player.getAdvancementTracker();
+            for (net.minecraft.advancement.AdvancementEntry adv : server.getAdvancementLoader().getAdvancements()) {
+                if (tracker.getProgress(adv).isDone()) {
+                    Long locId = com.minecraftarchipelago.aplocations.LocationRegistry.getLocationId(adv.id());
+                    if (locId != null) {
+                        state.checkLocation(locId);
+                    }
+                }
+            }
+        }
+
+        for (long locationId : state.getAllChecked()) {
+            APSession.client().checkLocation(locationId);
+        }
+
+        VictoryCondition.resendIfAchieved(server);
+    }
+
+    record ReceivedItemDecision(boolean duplicate,
+                                APGiveItemRegistry.GiveEntry giveEntry,
+                                Identifier stageId) {
     }
 }

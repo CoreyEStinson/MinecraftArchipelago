@@ -38,7 +38,7 @@ public final class ChestOpenHandler {
     public static void requestScout(long locationId) {
         ArrayList<Long> locations = new ArrayList<>();
         locations.add(locationId);
-        APSession.CLIENT.scoutLocations(locations);
+        APSession.client().scoutLocations(locations);
     }
 
     /**

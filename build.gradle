@@ -10,6 +10,20 @@ base {
 	archivesName = project.archives_base_name
 }
 
+sourceSets {
+	integrationTest {
+		java.srcDir file('src/integrationTest/java')
+		resources.srcDir file('src/integrationTest/resources')
+		compileClasspath += sourceSets.main.output + configurations.testRuntimeClasspath
+		runtimeClasspath += output + compileClasspath
+	}
+}
+
+configurations {
+	integrationTestImplementation.extendsFrom testImplementation
+	integrationTestRuntimeOnly.extendsFrom testRuntimeOnly
+}
+
 repositories {
 	// Add repositories to retrieve artifacts from in here.
 	// You should only use this when depending on other mods because
@@ -21,6 +35,14 @@ repositories {
 fabricApi {
 	configureDataGeneration {
 		client = true
+	}
+
+	configureTests {
+		createSourceSet = true
+		modId = "minecraftarchipelago-gametest"
+		enableGameTests = true
+		enableClientGameTests = false
+		eula = true
 	}
 }
 
@@ -84,6 +106,29 @@ tasks.register('unitTest', Test) {
 	classpath = sourceSets.test.getRuntimeClasspath() + sourceSets.main.getRuntimeClasspath()
 	testClassesDirs = sourceSets.test.getOutput().getClassesDirs()
 	dependsOn compileTestJava, compileJava
+}
+
+tasks.register('integrationTest', Test) {
+	useJUnitPlatform()
+	systemProperty 'junit.jupiter.extensions.autodetection.enabled', 'true'
+	testLogging {
+		showStandardStreams = true
+		showExceptions = true
+		showStackTraces = true
+		exceptionFormat = 'full'
+	}
+	testClassesDirs = sourceSets.integrationTest.output.classesDirs
+	classpath = sourceSets.integrationTest.runtimeClasspath
+	dependsOn compileIntegrationTestJava, processIntegrationTestResources
+}
+
+tasks.named('check') {
+	dependsOn tasks.named('integrationTest')
+}
+
+tasks.register('gameTest') {
+	group = 'verification'
+	dependsOn tasks.named('runGameTest')
 }
 
 processResources {

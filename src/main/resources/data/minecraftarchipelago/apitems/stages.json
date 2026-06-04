@@ -21,7 +21,7 @@
     { "ap_item_id": 43020, "stage": "minecraftarchipelago:items/boat" },
     { "ap_item_id": 43021, "stage": "minecraftarchipelago:items/crossbow" },
     { "ap_item_id": 43022, "stage": "minecraftarchipelago:items/ender_pearl" },
-    { "ap_item_id": 43023, "stage": "minecraftarchipelago:items/eye_of_ender" },
+    { "ap_item_id": 43023, "stage": "minecraftarchipelago:items/ender_eye" },
     { "ap_item_id": 43024, "stage": "minecraftarchipelago:blocks/beacon" },
     { "ap_item_id": 43025, "stage": "minecraftarchipelago:items/conduit" },
     { "ap_item_id": 43026, "stage": "minecraftarchipelago:blocks/bed" },

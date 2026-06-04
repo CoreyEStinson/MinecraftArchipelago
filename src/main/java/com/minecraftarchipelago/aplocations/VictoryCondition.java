@@ -4,7 +4,6 @@ import com.minecraftarchipelago.APSession;
 import com.minecraftarchipelago.SlotData;
 import com.minecraftarchipelago.victory.VictoryConditionRegistry;
 import io.github.archipelagomw.ClientStatus;
-import net.minecraft.client.MinecraftClient;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
@@ -29,8 +28,8 @@ public final class VictoryCondition {
         // ── All conditions satisfied ──────────────────────────────────────────
         state.markGoalAchieved();
 
-        MinecraftClient.getInstance().execute(() ->
-                APSession.CLIENT.setGameState(ClientStatus.CLIENT_GOAL)
+        APSession.runtime().executeOnClient(() ->
+                APSession.client().setGameState(ClientStatus.CLIENT_GOAL)
         );
 
         server.getPlayerManager().broadcast(
@@ -51,8 +50,8 @@ public final class VictoryCondition {
     public static void resendIfAchieved(MinecraftServer server) {
         if (!CheckedLocationsState.get(server).isGoalAchieved()) return;
 
-        MinecraftClient.getInstance().execute(() ->
-                APSession.CLIENT.setGameState(ClientStatus.CLIENT_GOAL)
+        APSession.runtime().executeOnClient(() ->
+                APSession.client().setGameState(ClientStatus.CLIENT_GOAL)
         );
     }
 

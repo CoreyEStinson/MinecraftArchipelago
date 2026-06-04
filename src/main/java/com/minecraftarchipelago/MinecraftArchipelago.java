@@ -11,9 +11,6 @@ import com.minecraftarchipelago.apstages.service.StageUnlockApplier;
 import com.minecraftarchipelago.apstages.state.StageUnlockState;
 import com.minecraftarchipelago.collections.ItemCollection;
 import com.minecraftarchipelago.collections.ItemCollectionRegistry;
-import com.minecraftarchipelago.hud.APHudRenderer;
-import com.minecraftarchipelago.hud.APHudState;
-import com.minecraftarchipelago.hud.APWinConditionsRenderer;
 import com.minecraftarchipelago.item.ModItems;
 import com.minecraftarchipelago.loot.APLootTableModifier;
 import com.minecraftarchipelago.loot.AssignLootableCheckFunction;
@@ -62,9 +59,6 @@ public class MinecraftArchipelago implements ModInitializer {
 			VictoryConditionRegistry.register(new ItemCollectionChecker(collection));
 		}
 
-		APHudRenderer.register();
-		APWinConditionsRenderer.register();
-
 		ModItems.register();
 		APLootTableModifier.register();
 		ResourceManagerHelper.get(ResourceType.SERVER_DATA)
@@ -80,14 +74,17 @@ public class MinecraftArchipelago implements ModInitializer {
 
 		ServerPlayConnectionEvents.JOIN.register((handler, sender, server) -> {
 			ServerPlayerEntity player = handler.player;
-			server.execute(() -> {
-				StageUnlockState state = StageUnlockState.get(server);
-				Identifier baseRules = Identifier.of("minecraftarchipelago", "base_rules");
-
-				if (state.unlock(player.getUuid(), baseRules)){
-					StageUnlockApplier.apply(player, baseRules);
-				}
-			});
+			server.execute(() -> applyBaseRulesOnFirstJoin(server, player));
 		});
+	}
+
+	static void applyBaseRulesOnFirstJoin(net.minecraft.server.MinecraftServer server,
+										  ServerPlayerEntity player) {
+		StageUnlockState state = StageUnlockState.get(server);
+		Identifier baseRules = Identifier.of("minecraftarchipelago", "base_rules");
+
+		if (state.unlock(player.getUuid(), baseRules)) {
+			StageUnlockApplier.apply(player, baseRules);
+		}
 	}
 }

@@ -2,6 +2,7 @@ package com.minecraftarchipelago;
 
 import com.minecraftarchipelago.hud.APHudRenderer;
 import com.minecraftarchipelago.hud.APHudState;
+import com.minecraftarchipelago.hud.APWinConditionsRenderer;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandManager;
@@ -33,6 +34,7 @@ public class MinecraftArchipelagoClient implements ClientModInitializer
     public void onInitializeClient()
     {
         APHudRenderer.register();
+        APWinConditionsRenderer.register();
 
         // Register the toggle keybind (default: H, changeable in Controls)
         KeyBinding hudToggleKey = KeyBindingHelper.registerKeyBinding(new KeyBinding(

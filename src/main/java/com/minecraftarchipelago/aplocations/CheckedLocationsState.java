@@ -116,4 +116,11 @@ public final class CheckedLocationsState extends PersistentState{
         }
         return count;
     }
+
+    public void resetForTests() {
+        checkedIds.clear();
+        goalAchieved = false;
+        lastReceivedItemIndex = -1;
+        markDirty();
+    }
 }

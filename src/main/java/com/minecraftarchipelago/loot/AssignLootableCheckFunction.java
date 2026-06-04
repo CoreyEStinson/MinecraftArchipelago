@@ -39,6 +39,11 @@ public class AssignLootableCheckFunction extends ConditionalLootFunction {
 
     @Override
     protected ItemStack process(ItemStack stack, LootContext context) {
+        MinecraftServer server = context.getWorld().getServer();
+        return assignLootableCheck(stack, server);
+    }
+
+    public static ItemStack assignLootableCheck(ItemStack stack, MinecraftServer server) {
         if (!(stack.getItem() instanceof ArchipelagoCheckItem)) return stack;
 
         NbtCompound nbt = ArchipelagoCheckItem.getCustomData(stack);
@@ -54,8 +59,6 @@ public class AssignLootableCheckFunction extends ConditionalLootFunction {
             ArchipelagoCheckItem.setCustomData(stack, nbt);
             return stack;
         }
-
-        MinecraftServer server = context.getWorld().getServer();
         if (server == null) return stack;
 
         long locationId = LootableCheckState.get(server).assignNext(poolSize);

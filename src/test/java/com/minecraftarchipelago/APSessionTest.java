@@ -11,9 +11,10 @@ class APSessionTest {
 
     @Test
     void testAPSessionStaticMethods() {
-        // Test that APSession static methods work
-        assertNotNull(APSession.CLIENT);
-        
+        // Test that APSession static accessors work in plain JVM tests without Fabric bootstrapping.
+        assertNotNull(APSession.client());
+        assertNotNull(APSession.runtime());
+
         // Test slot data methods
         assertNull(APSession.getSlotData());
         assertFalse(APSession.hasSlotData());

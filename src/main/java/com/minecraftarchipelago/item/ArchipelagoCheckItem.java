@@ -6,7 +6,6 @@ import com.minecraftarchipelago.aplocations.CheckedLocationsState;
 import com.minecraftarchipelago.aplocations.LootableCheckState;
 import com.minecraftarchipelago.aplocations.VictoryCondition;
 import com.minecraftarchipelago.loot.ChestOpenHandler;
-import net.minecraft.client.MinecraftClient;
 import net.minecraft.component.DataComponentTypes;
 import net.minecraft.component.type.NbtComponent;
 import net.minecraft.entity.Entity;
@@ -236,9 +235,9 @@ public class ArchipelagoCheckItem extends Item {
 
         if (wasNew) {
             // Dispatch to client thread for the AP call
-            MinecraftClient.getInstance().execute(() -> {
-                if (APSession.CLIENT.isConnected()) {
-                    APSession.CLIENT.checkLocation(locationId);
+            APSession.runtime().executeOnClient(() -> {
+                if (APSession.client().isConnected()) {
+                    APSession.client().checkLocation(locationId);
                 }
                 // If offline: already stored in CheckedLocationsState and will be
                 // resent by APEvents.onConnected when the player reconnects.

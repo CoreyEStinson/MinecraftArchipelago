@@ -1,0 +1,12 @@
+{
+  "schemaVersion": 1,
+  "id": "minecraftarchipelago-gametest",
+  "version": "1.0.0",
+  "name": "MinecraftArchipelago Game Tests",
+  "environment": "*",
+  "entrypoints": {
+    "fabric-gametest": [
+      "com.minecraftarchipelago.MinecraftArchipelagoGameTest"
+    ]
+  }
+}

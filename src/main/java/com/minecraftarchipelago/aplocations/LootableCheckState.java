@@ -78,4 +78,9 @@ public class LootableCheckState extends PersistentState {
         state.nextSlot = nbt.getInt(NBT_SLOT);
         return state;
     }
+
+    public void resetForTests() {
+        nextSlot = 0;
+        markDirty();
+    }
 }
