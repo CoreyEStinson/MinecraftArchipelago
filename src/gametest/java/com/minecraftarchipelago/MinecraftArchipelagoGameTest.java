@@ -10,11 +10,14 @@ import com.minecraftarchipelago.facades.MinecraftRuntimeFacade;
 import com.minecraftarchipelago.item.ArchipelagoCheckItem;
 import com.minecraftarchipelago.item.ModItems;
 import com.minecraftarchipelago.loot.AssignLootableCheckFunction;
+import com.minecraftarchipelago.loot.APLootSourceItemFactory;
+import com.minecraftarchipelago.loot.APVillagerLootTrades;
 import com.minecraftarchipelago.loot.ChestOpenHandler;
 import com.minecraftarchipelago.loot.LootableItemNameCache;
 import io.github.archipelagomw.ClientStatus;
 import net.fabricmc.fabric.api.gametest.v1.FabricGameTest;
 import net.minecraft.item.ItemStack;
+import net.minecraft.item.Items;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.test.GameTest;
@@ -190,6 +193,29 @@ public final class MinecraftArchipelagoGameTest implements FabricGameTest {
         var secondNbt = ArchipelagoCheckItem.getCustomData(second);
 
         context.assertTrue(secondNbt.getBoolean(ArchipelagoCheckItem.NBT_SURPLUS), "A second loot item should become surplus after the pool is exhausted.");
+        context.complete();
+    }
+
+    @GameTest(templateName = FabricGameTest.EMPTY_STRUCTURE)
+    public void lootSourceMetadataIsWrittenToGeneratedItems(TestContext context) {
+        ItemStack stack = APLootSourceItemFactory.create("fishing", "Fishing");
+        var nbt = ArchipelagoCheckItem.getCustomData(stack);
+
+        context.assertTrue("fishing".equals(nbt.getString(ArchipelagoCheckItem.NBT_LOOT_SOURCE)), "AP loot source id should be written to item custom data.");
+        context.assertTrue("Fishing".equals(nbt.getString(ArchipelagoCheckItem.NBT_LOOT_SOURCE_NAME)), "AP loot source display name should be written to item custom data.");
+        context.complete();
+    }
+
+    @GameTest(templateName = FabricGameTest.EMPTY_STRUCTURE)
+    public void villagerLootTradeIsSingleUseAndKeepsSourceMetadata(TestContext context) {
+        var offer = APVillagerLootTrades.createOffer("villager_master", "Villager Master Trade", Items.EMERALD, 24);
+        var sellItem = offer.getSellItem();
+        var nbt = ArchipelagoCheckItem.getCustomData(sellItem);
+
+        context.assertEquals(1, offer.getMaxUses(), "Villager AP trade should be single use.");
+        context.assertTrue(sellItem.getItem() instanceof ArchipelagoCheckItem, "Villager AP trade should sell an AP check item.");
+        context.assertTrue("villager_master".equals(nbt.getString(ArchipelagoCheckItem.NBT_LOOT_SOURCE)), "Villager trade source id should be written.");
+        context.assertTrue("Villager Master Trade".equals(nbt.getString(ArchipelagoCheckItem.NBT_LOOT_SOURCE_NAME)), "Villager trade source display name should be written.");
         context.complete();
     }
 

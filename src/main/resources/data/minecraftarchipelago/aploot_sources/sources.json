@@ -1,0 +1,224 @@
+{
+  "sources": [
+    {
+      "id": "structure_chests",
+      "type": "loot_table",
+      "chance": 0.33,
+      "display_name": "Structure Chest",
+      "tables": [
+        "minecraft:chests/village/village_armorer",
+        "minecraft:chests/village/village_butcher",
+        "minecraft:chests/village/village_cartographer",
+        "minecraft:chests/village/village_desert_house",
+        "minecraft:chests/village/village_fisher",
+        "minecraft:chests/village/village_fletcher",
+        "minecraft:chests/village/village_mason",
+        "minecraft:chests/village/village_plains_house",
+        "minecraft:chests/village/village_savanna_house",
+        "minecraft:chests/village/village_shepherd",
+        "minecraft:chests/village/village_snowy_house",
+        "minecraft:chests/village/village_taiga_house",
+        "minecraft:chests/village/village_tannery",
+        "minecraft:chests/village/village_temple",
+        "minecraft:chests/village/village_tool_smith",
+        "minecraft:chests/village/village_weaponsmith",
+        "minecraft:chests/abandoned_mineshaft",
+        "minecraft:chests/ancient_city",
+        "minecraft:chests/ancient_city_ice_box",
+        "minecraft:chests/buried_treasure",
+        "minecraft:chests/desert_pyramid",
+        "minecraft:chests/igloo_chest",
+        "minecraft:chests/jungle_temple",
+        "minecraft:chests/jungle_temple_dispenser",
+        "minecraft:chests/pillager_outpost",
+        "minecraft:chests/ruined_portal",
+        "minecraft:chests/shipwreck_map",
+        "minecraft:chests/shipwreck_supply",
+        "minecraft:chests/shipwreck_treasure",
+        "minecraft:chests/simple_dungeon",
+        "minecraft:chests/underwater_ruin_big",
+        "minecraft:chests/underwater_ruin_small",
+        "minecraft:chests/woodland_mansion",
+        "minecraft:chests/stronghold_corridor",
+        "minecraft:chests/stronghold_crossing",
+        "minecraft:chests/stronghold_library",
+        "minecraft:chests/bastion_bridge",
+        "minecraft:chests/bastion_hoglin_stable",
+        "minecraft:chests/bastion_other",
+        "minecraft:chests/bastion_treasure",
+        "minecraft:chests/nether_bridge",
+        "minecraft:chests/end_city_treasure"
+      ]
+    },
+    {
+      "id": "mob_common",
+      "type": "entity_drop",
+      "chance": 0.01,
+      "display_name": "Common Mob Drop",
+      "entities": [
+        "minecraft:zombie",
+        "minecraft:zombie_villager",
+        "minecraft:husk",
+        "minecraft:drowned",
+        "minecraft:skeleton",
+        "minecraft:stray",
+        "minecraft:bogged",
+        "minecraft:spider",
+        "minecraft:cave_spider",
+        "minecraft:creeper",
+        "minecraft:slime",
+        "minecraft:magma_cube",
+        "minecraft:silverfish",
+        "minecraft:endermite",
+        "minecraft:pillager",
+        "minecraft:hoglin"
+      ],
+      "tables": [
+        "minecraft:entities/zombie",
+        "minecraft:entities/zombie_villager",
+        "minecraft:entities/husk",
+        "minecraft:entities/drowned",
+        "minecraft:entities/skeleton",
+        "minecraft:entities/stray",
+        "minecraft:entities/bogged",
+        "minecraft:entities/spider",
+        "minecraft:entities/cave_spider",
+        "minecraft:entities/creeper",
+        "minecraft:entities/slime",
+        "minecraft:entities/magma_cube",
+        "minecraft:entities/silverfish",
+        "minecraft:entities/endermite",
+        "minecraft:entities/pillager",
+        "minecraft:entities/hoglin"
+      ]
+    },
+    {
+      "id": "mob_uncommon",
+      "type": "entity_drop",
+      "chance": 0.03,
+      "display_name": "Uncommon Mob Drop",
+      "entities": [
+        "minecraft:guardian",
+        "minecraft:blaze",
+        "minecraft:witch",
+        "minecraft:vindicator",
+        "minecraft:vex",
+        "minecraft:shulker",
+        "minecraft:ghast",
+        "minecraft:piglin_brute",
+        "minecraft:zoglin",
+        "minecraft:wither_skeleton",
+        "minecraft:breeze",
+        "minecraft:phantom"
+      ],
+      "tables": [
+        "minecraft:entities/guardian",
+        "minecraft:entities/blaze",
+        "minecraft:entities/witch",
+        "minecraft:entities/vindicator",
+        "minecraft:entities/vex",
+        "minecraft:entities/shulker",
+        "minecraft:entities/ghast",
+        "minecraft:entities/piglin_brute",
+        "minecraft:entities/zoglin",
+        "minecraft:entities/wither_skeleton",
+        "minecraft:entities/breeze",
+        "minecraft:entities/phantom"
+      ]
+    },
+    {
+      "id": "mob_rare",
+      "type": "entity_drop",
+      "chance": 0.05,
+      "display_name": "Rare Mob Drop",
+      "entities": [
+        "minecraft:elder_guardian",
+        "minecraft:warden",
+        "minecraft:ravager",
+        "minecraft:evoker",
+        "minecraft:wither",
+        "minecraft:ender_dragon"
+      ],
+      "tables": [
+        "minecraft:entities/elder_guardian",
+        "minecraft:entities/warden",
+        "minecraft:entities/ravager",
+        "minecraft:entities/evoker",
+        "minecraft:entities/wither"
+      ]
+    },
+    {
+      "id": "ender_dragon_death_fallback",
+      "type": "entity_death_fallback",
+      "chance": 0.05,
+      "display_name": "Rare Mob Drop",
+      "entities": ["minecraft:ender_dragon"]
+    },
+    {
+      "id": "fishing",
+      "type": "loot_table",
+      "chance": 0.04,
+      "display_name": "Fishing",
+      "tables": ["minecraft:gameplay/fishing"]
+    },
+    {
+      "id": "piglin_bartering",
+      "type": "loot_table",
+      "chance": 0.03,
+      "display_name": "Piglin Bartering",
+      "tables": ["minecraft:gameplay/piglin_bartering"]
+    },
+    {
+      "id": "trial_vault",
+      "type": "loot_table",
+      "chance": 0.20,
+      "display_name": "Trial Chamber Vault",
+      "tables": [
+        "minecraft:chests/trial_chambers/reward",
+        "minecraft:chests/trial_chambers/reward_common",
+        "minecraft:chests/trial_chambers/reward_rare",
+        "minecraft:chests/trial_chambers/reward_unique"
+      ]
+    },
+    {
+      "id": "trial_ominous_vault",
+      "type": "loot_table",
+      "chance": 0.35,
+      "display_name": "Ominous Vault",
+      "tables": [
+        "minecraft:chests/trial_chambers/reward_ominous",
+        "minecraft:chests/trial_chambers/reward_ominous_common",
+        "minecraft:chests/trial_chambers/reward_ominous_rare",
+        "minecraft:chests/trial_chambers/reward_ominous_unique"
+      ]
+    },
+    {
+      "id": "villager_expert",
+      "type": "villager_trade",
+      "chance": 0.07,
+      "display_name": "Villager Expert Trade",
+      "villager_level": 4
+    },
+    {
+      "id": "villager_master",
+      "type": "villager_trade",
+      "chance": 0.15,
+      "display_name": "Villager Master Trade",
+      "villager_level": 5
+    },
+    {
+      "id": "archaeology",
+      "type": "loot_table",
+      "chance": 0.08,
+      "display_name": "Archaeology",
+      "tables": [
+        "minecraft:archaeology/desert_well",
+        "minecraft:archaeology/desert_pyramid",
+        "minecraft:archaeology/trail_ruins_common",
+        "minecraft:archaeology/trail_ruins_rare",
+        "minecraft:archaeology/ocean_ruin_warm",
+        "minecraft:archaeology/ocean_ruin_cold"
+      ]
+    }
+  ]
+}

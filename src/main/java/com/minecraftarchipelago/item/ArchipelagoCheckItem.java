@@ -35,6 +35,8 @@ public class ArchipelagoCheckItem extends Item {
     public static final String NBT_SURPLUS = "ap_surplus";
     public static final String NBT_AP_ITEM_NAME   = "ap_item_display_name";
     public static final String NBT_AP_PLAYER_NAME = "ap_player_display_name";
+    public static final String NBT_LOOT_SOURCE = "ap_loot_source";
+    public static final String NBT_LOOT_SOURCE_NAME = "ap_loot_source_name";
 
     public ArchipelagoCheckItem(Settings settings) {
         super(settings);
@@ -92,6 +94,7 @@ public class ArchipelagoCheckItem extends Item {
         if (nbt.getBoolean(NBT_SURPLUS)) {
             tooltip.add(Text.literal("All lootable checks have been found.")
                     .formatted(Formatting.DARK_GRAY, Formatting.ITALIC));
+            appendSourceTooltip(nbt, tooltip);
             return;
         }
 
@@ -110,6 +113,8 @@ public class ArchipelagoCheckItem extends Item {
                         .formatted(Formatting.GRAY, Formatting.ITALIC));
             }
 
+            appendSourceTooltip(nbt, tooltip);
+
             tooltip.add(Text.literal(""));
             tooltip.add(Text.empty()
                     .append(Text.literal("Right-click").formatted(Formatting.YELLOW))
@@ -120,6 +125,7 @@ public class ArchipelagoCheckItem extends Item {
         // Unassigned — sitting in a chest or just picked up before connecting
         tooltip.add(Text.literal("A location waiting to be claimed...")
                 .formatted(Formatting.GRAY, Formatting.ITALIC));
+        appendSourceTooltip(nbt, tooltip);
         tooltip.add(Text.literal(""));
         tooltip.add(Text.empty()
                 .append(Text.literal("Right-click").formatted(Formatting.YELLOW))
@@ -267,6 +273,14 @@ public class ArchipelagoCheckItem extends Item {
 
     private static int checkNumber(NbtCompound nbt) {
         return (int)(nbt.getLong(NBT_LOCATION_ID) - SlotData.LOOTABLE_CHECK_BASE_ID) + 1;
+    }
+
+    private static void appendSourceTooltip(NbtCompound nbt, List<Text> tooltip) {
+        if (!nbt.contains(NBT_LOOT_SOURCE_NAME)) return;
+
+        tooltip.add(Text.empty()
+                .append(Text.literal("Found from: ").formatted(Formatting.GRAY))
+                .append(Text.literal(nbt.getString(NBT_LOOT_SOURCE_NAME)).formatted(Formatting.YELLOW)));
     }
 
     // Returns the item's custom NBT data, or an empty compound if none exists.

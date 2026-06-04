@@ -12,9 +12,14 @@ import com.minecraftarchipelago.apstages.state.StageUnlockState;
 import com.minecraftarchipelago.collections.ItemCollection;
 import com.minecraftarchipelago.collections.ItemCollectionRegistry;
 import com.minecraftarchipelago.item.ModItems;
+import com.minecraftarchipelago.loot.APEntityDeathLootHandler;
 import com.minecraftarchipelago.loot.APLootTableModifier;
+import com.minecraftarchipelago.loot.APLootSourceRegistry;
+import com.minecraftarchipelago.loot.APLootSourcesReloadListener;
+import com.minecraftarchipelago.loot.APVillagerLootTrades;
 import com.minecraftarchipelago.loot.AssignLootableCheckFunction;
 import com.minecraftarchipelago.loot.ChestOpenHandler;
+import com.minecraftarchipelago.loot.SetLootSourceFunction;
 import com.minecraftarchipelago.victory.*;
 import net.fabricmc.api.ModInitializer;
 
@@ -50,6 +55,11 @@ public class MinecraftArchipelago implements ModInitializer {
 				Identifier.of("minecraftarchipelago", "assign_lootable_check"),
 				AssignLootableCheckFunction.TYPE
 		);
+		Registry.register(
+				Registries.LOOT_FUNCTION_TYPE,
+				Identifier.of("minecraftarchipelago", "set_loot_source"),
+				SetLootSourceFunction.TYPE
+		);
 
 		// --- Win condition checkers (order determines HUD display order) ---
 		VictoryConditionRegistry.register(new AdvancementGoalChecker());
@@ -60,7 +70,12 @@ public class MinecraftArchipelago implements ModInitializer {
 		}
 
 		ModItems.register();
+		APLootSourceRegistry.loadBundledDefaults();
 		APLootTableModifier.register();
+		APEntityDeathLootHandler.register();
+		APVillagerLootTrades.register();
+		ResourceManagerHelper.get(ResourceType.SERVER_DATA)
+				.registerReloadListener(new APLootSourcesReloadListener());
 		ResourceManagerHelper.get(ResourceType.SERVER_DATA)
 			.registerReloadListener(new APStagesReloadListener());
 		ItemStageEnforcer.register();
