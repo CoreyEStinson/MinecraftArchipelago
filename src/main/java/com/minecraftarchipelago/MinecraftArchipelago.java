@@ -6,7 +6,6 @@ import com.minecraftarchipelago.aplocations.APLocationsReloadListener;
 import com.minecraftarchipelago.aplocations.BossKillListener;
 import com.minecraftarchipelago.aplocations.VictoryCondition;
 import com.minecraftarchipelago.apstages.APStagesReloadListener;
-import com.minecraftarchipelago.apstages.command.StageCommands;
 import com.minecraftarchipelago.apstages.item.ItemStageEnforcer;
 import com.minecraftarchipelago.apstages.service.StageUnlockApplier;
 import com.minecraftarchipelago.apstages.state.StageUnlockState;
@@ -70,7 +69,6 @@ public class MinecraftArchipelago implements ModInitializer {
 		APLootTableModifier.register();
 		ResourceManagerHelper.get(ResourceType.SERVER_DATA)
 			.registerReloadListener(new APStagesReloadListener());
-		StageCommands.register();
 		ItemStageEnforcer.register();
 		ResourceManagerHelper.get(ResourceType.SERVER_DATA)
 				.registerReloadListener(new APLocationsReloadListener());

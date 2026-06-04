@@ -14,7 +14,7 @@ class APHudStateTest {
         // Test that static fields are accessible and have expected default values
         assertTrue(APHudState.visible);
         assertFalse(APHudState.connected);
-        assertEquals("-", APHudState.address);
+        assertEquals("—", APHudState.address);
         assertEquals(0, APHudState.locationsChecked);
         assertEquals(0, APHudState.locationsTotal);
         assertEquals(70, APHudState.goalPercent);
