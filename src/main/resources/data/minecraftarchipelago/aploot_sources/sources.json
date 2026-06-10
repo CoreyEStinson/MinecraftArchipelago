@@ -3,7 +3,7 @@
     {
       "id": "structure_chests",
       "type": "loot_table",
-      "chance": 0.15,
+      "chance": 0.33,
       "display_name": "Structure Chest",
       "tables": [
         "minecraft:chests/village/village_armorer",
@@ -53,7 +53,7 @@
     {
       "id": "mob_common",
       "type": "entity_drop",
-      "chance": 0.01,
+      "chance": 0.02,
       "display_name": "Common Mob Drop",
       "entities": [
         "minecraft:zombie",
@@ -95,7 +95,7 @@
     {
       "id": "mob_uncommon",
       "type": "entity_drop",
-      "chance": 0.03,
+      "chance": 0.06,
       "display_name": "Uncommon Mob Drop",
       "entities": [
         "minecraft:guardian",
@@ -129,7 +129,7 @@
     {
       "id": "mob_rare",
       "type": "entity_drop",
-      "chance": 0.05,
+      "chance": 0.1,
       "display_name": "Rare Mob Drop",
       "entities": [
         "minecraft:elder_guardian",
@@ -150,14 +150,14 @@
     {
       "id": "ender_dragon_death_fallback",
       "type": "entity_death_fallback",
-      "chance": 0.05,
+      "chance": 1,
       "display_name": "Rare Mob Drop",
       "entities": ["minecraft:ender_dragon"]
     },
     {
       "id": "fishing",
       "type": "loot_table",
-      "chance": 0.04,
+      "chance": 0.1,
       "display_name": "Fishing",
       "tables": ["minecraft:gameplay/fishing"]
     },
@@ -195,21 +195,21 @@
     {
       "id": "villager_expert",
       "type": "villager_trade",
-      "chance": 0.07,
+      "chance": 0.25,
       "display_name": "Villager Expert Trade",
       "villager_level": 4
     },
     {
       "id": "villager_master",
       "type": "villager_trade",
-      "chance": 0.15,
+      "chance": 0.5,
       "display_name": "Villager Master Trade",
       "villager_level": 5
     },
     {
       "id": "archaeology",
       "type": "loot_table",
-      "chance": 0.08,
+      "chance": 0.2,
       "display_name": "Archaeology",
       "tables": [
         "minecraft:archaeology/desert_well",

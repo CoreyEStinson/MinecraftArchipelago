@@ -12,7 +12,6 @@ import com.minecraftarchipelago.item.ModItems;
 import com.minecraftarchipelago.loot.AssignLootableCheckFunction;
 import com.minecraftarchipelago.loot.APLootSourceItemFactory;
 import com.minecraftarchipelago.loot.APVillagerLootTrades;
-import com.minecraftarchipelago.loot.ChestOpenHandler;
 import com.minecraftarchipelago.loot.LootableItemNameCache;
 import io.github.archipelagomw.ClientStatus;
 import net.fabricmc.fabric.api.gametest.v1.FabricGameTest;
@@ -119,27 +118,26 @@ public final class MinecraftArchipelagoGameTest implements FabricGameTest {
         ItemStack stack = new ItemStack(ModItems.ARCHIPELAGO_CHECK);
         player.setStackInHand(Hand.MAIN_HAND, stack);
 
-        stack.getItem().inventoryTick(stack, context.getWorld(), player, 0, true);
         var nbt = ArchipelagoCheckItem.getCustomData(stack);
         long locationId = SlotData.LOOTABLE_CHECK_BASE_ID;
 
-        context.assertTrue(nbt.getBoolean(ArchipelagoCheckItem.NBT_ASSIGNED), "Loot item should be assigned after inventory tick.");
-        context.assertEquals(locationId, nbt.getLong(ArchipelagoCheckItem.NBT_LOCATION_ID), "Assigned location should use the first lootable slot.");
-        context.assertEquals(1, LootableCheckState.get(server).getAssignedCount(), "Exactly one lootable slot should be assigned.");
-        context.assertEquals(1, client.scoutRequests.size(), "Assignment should request one scout.");
+        context.assertTrue(!nbt.getBoolean(ArchipelagoCheckItem.NBT_ASSIGNED), "Loot item should remain unassigned until it is claimed.");
+        context.assertEquals(0, LootableCheckState.get(server).getAssignedCount(), "Creating the item should not consume a lootable slot.");
+        context.assertEquals(0, client.scoutRequests.size(), "Creating the item should not request a scout.");
 
         ((ArchipelagoCheckItem) stack.getItem()).use(context.getWorld(), player, Hand.MAIN_HAND);
 
         context.assertTrue(CheckedLocationsState.get(server).isLocationChecked(locationId), "Claiming the item should check the assigned location.");
         context.assertTrue(CheckedLocationsState.get(server).isGoalAchieved(), "Claiming the final required lootable check should award victory.");
         context.assertTrue(player.getMainHandStack().isEmpty(), "Claiming the loot item should consume it.");
+        context.assertEquals(1, LootableCheckState.get(server).getAssignedCount(), "Claiming the item should consume exactly one lootable slot.");
         context.assertTrue(client.checkedLocations.contains(locationId), "Claiming should notify Archipelago about the checked location.");
         context.assertTrue(client.gameStates.contains(ClientStatus.CLIENT_GOAL), "Claiming the final required check should send CLIENT_GOAL.");
         context.complete();
     }
 
     @GameTest(templateName = FabricGameTest.EMPTY_STRUCTURE)
-    public void chestOpenAssignmentRequestsScoutAndAppliesCachedName(TestContext context) {
+    public void generatedLootDoesNotAssignUntilClaim(TestContext context) {
         MinecraftServer server = context.getWorld().getServer();
         ServerPlayerEntity player = context.createMockCreativeServerPlayerInWorld();
         RecordingClientFacade client = new RecordingClientFacade();
@@ -155,23 +153,19 @@ public final class MinecraftArchipelagoGameTest implements FabricGameTest {
 
         ItemStack stack = new ItemStack(ModItems.ARCHIPELAGO_CHECK);
         player.getInventory().setStack(0, stack);
+
         AssignLootableCheckFunction.assignLootableCheck(stack, server);
+        stack.getItem().inventoryTick(stack, context.getWorld(), player, 0, false);
 
-        var assignedNbt = ArchipelagoCheckItem.getCustomData(stack);
-        long locationId = assignedNbt.getLong(ArchipelagoCheckItem.NBT_LOCATION_ID);
-        LootableItemNameCache.put(locationId, "Test Bow", "Alice");
-        ChestOpenHandler.applyNameToAllMatchingItems(server, locationId);
-
-        var namedNbt = ArchipelagoCheckItem.getCustomData(player.getInventory().getStack(0));
-        context.assertTrue(namedNbt.getBoolean(ArchipelagoCheckItem.NBT_ASSIGNED), "Chest-open assignment should mark the AP loot item as assigned.");
-        context.assertEquals(1, client.scoutRequests.size(), "Chest-open assignment should request one scout.");
-        context.assertTrue("Test Bow".equals(namedNbt.getString(ArchipelagoCheckItem.NBT_AP_ITEM_NAME)), "Applying scout data should fill in the AP item name.");
-        context.assertTrue("Alice".equals(namedNbt.getString(ArchipelagoCheckItem.NBT_AP_PLAYER_NAME)), "Applying scout data should fill in the recipient name.");
+        var nbt = ArchipelagoCheckItem.getCustomData(player.getInventory().getStack(0));
+        context.assertTrue(!nbt.getBoolean(ArchipelagoCheckItem.NBT_ASSIGNED), "Generated loot should stay unassigned until the player claims it.");
+        context.assertEquals(0, LootableCheckState.get(server).getAssignedCount(), "Generating loot should not advance the lootable slot cursor.");
+        context.assertEquals(0, client.scoutRequests.size(), "Generating loot should not request scouting.");
         context.complete();
     }
 
     @GameTest(templateName = FabricGameTest.EMPTY_STRUCTURE)
-    public void lootableAssignmentMarksSurplusWhenPoolIsExhausted(TestContext context) {
+    public void secondLootableClaimMarksSurplusWhenPoolIsExhausted(TestContext context) {
         MinecraftServer server = context.getWorld().getServer();
         ServerPlayerEntity player = context.createMockCreativeServerPlayerInWorld();
         RecordingClientFacade client = new RecordingClientFacade();
@@ -186,13 +180,19 @@ public final class MinecraftArchipelagoGameTest implements FabricGameTest {
         )));
 
         ItemStack first = new ItemStack(ModItems.ARCHIPELAGO_CHECK);
-        first.getItem().inventoryTick(first, context.getWorld(), player, 0, false);
+        player.setStackInHand(Hand.MAIN_HAND, first);
+        ((ArchipelagoCheckItem) first.getItem()).use(context.getWorld(), player, Hand.MAIN_HAND);
 
         ItemStack second = new ItemStack(ModItems.ARCHIPELAGO_CHECK);
-        second.getItem().inventoryTick(second, context.getWorld(), player, 1, false);
-        var secondNbt = ArchipelagoCheckItem.getCustomData(second);
+        player.setStackInHand(Hand.MAIN_HAND, second);
+        ((ArchipelagoCheckItem) second.getItem()).use(context.getWorld(), player, Hand.MAIN_HAND);
 
-        context.assertTrue(secondNbt.getBoolean(ArchipelagoCheckItem.NBT_SURPLUS), "A second loot item should become surplus after the pool is exhausted.");
+        context.assertEquals(1, LootableCheckState.get(server).getAssignedCount(), "A surplus claim should not advance the lootable slot cursor.");
+        context.assertEquals(1, CheckedLocationsState.get(server).countCheckedInRange(
+                SlotData.LOOTABLE_CHECK_BASE_ID,
+                SlotData.LOOTABLE_CHECK_BASE_ID + 1
+        ), "A surplus claim should not create an extra checked location.");
+        context.assertTrue(player.getMainHandStack().isEmpty(), "A surplus loot item should still be consumed when used.");
         context.complete();
     }
 

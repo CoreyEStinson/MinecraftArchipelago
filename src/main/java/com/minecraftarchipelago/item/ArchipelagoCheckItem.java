@@ -28,12 +28,11 @@ import java.util.List;
 
 public class ArchipelagoCheckItem extends Item {
 
-    // NBT keys
     public static final String NBT_ASSIGNED = "ap_assigned";
     public static final String NBT_LOCATION_ID = "ap_location_id";
     public static final String NBT_CLAIMED = "ap_claimed";
     public static final String NBT_SURPLUS = "ap_surplus";
-    public static final String NBT_AP_ITEM_NAME   = "ap_item_display_name";
+    public static final String NBT_AP_ITEM_NAME = "ap_item_display_name";
     public static final String NBT_AP_PLAYER_NAME = "ap_player_display_name";
     public static final String NBT_LOOT_SOURCE = "ap_loot_source";
     public static final String NBT_LOOT_SOURCE_NAME = "ap_loot_source_name";
@@ -42,18 +41,16 @@ public class ArchipelagoCheckItem extends Item {
         super(settings);
     }
 
-    // Name
     @Override
     public Text getName(ItemStack stack) {
         NbtCompound nbt = getCustomData(stack);
 
         if (nbt.getBoolean(NBT_SURPLUS)) {
-            return Text.literal("✦ Archipelago Loot ✦")
+            return Text.literal("âœ¦ Archipelago Loot âœ¦")
                     .formatted(Formatting.DARK_GRAY, Formatting.STRIKETHROUGH);
         }
 
         if (nbt.getBoolean(NBT_ASSIGNED)) {
-            // Scout result has arrived — show the item and recipient
             if (nbt.contains(NBT_AP_ITEM_NAME)) {
                 return Text.empty()
                         .append(Text.literal("⚡ ").formatted(Formatting.YELLOW))
@@ -63,7 +60,7 @@ public class ArchipelagoCheckItem extends Item {
                         .append(Text.literal(nbt.getString(NBT_AP_PLAYER_NAME))
                                 .formatted(Formatting.AQUA));
             }
-            // Scout pending — show check number
+
             return Text.empty()
                     .append(Text.literal("✦ ").formatted(Formatting.GOLD))
                     .append(Text.literal("Archipelago Loot")
@@ -114,7 +111,6 @@ public class ArchipelagoCheckItem extends Item {
             }
 
             appendSourceTooltip(nbt, tooltip);
-
             tooltip.add(Text.literal(""));
             tooltip.add(Text.empty()
                     .append(Text.literal("Right-click").formatted(Formatting.YELLOW))
@@ -122,74 +118,25 @@ public class ArchipelagoCheckItem extends Item {
             return;
         }
 
-        // Unassigned — sitting in a chest or just picked up before connecting
         tooltip.add(Text.literal("A location waiting to be claimed...")
                 .formatted(Formatting.GRAY, Formatting.ITALIC));
         appendSourceTooltip(nbt, tooltip);
         tooltip.add(Text.literal(""));
         tooltip.add(Text.empty()
                 .append(Text.literal("Right-click").formatted(Formatting.YELLOW))
-                .append(Text.literal(" to reveal and claim.")
-                        .formatted(Formatting.GRAY)));
+                .append(Text.literal(" to reveal and claim.").formatted(Formatting.GRAY)));
     }
 
     @Override
     public void inventoryTick(ItemStack stack, World world, Entity entity,
                               int slot, boolean selected) {
         if (world.isClient()) return;
-        if (!(entity instanceof ServerPlayerEntity player)) return;
+        if (!(entity instanceof ServerPlayerEntity)) return;
 
         NbtCompound nbt = getCustomData(stack);
-
-        // If assigned but no name yet — check if cache has arrived
         if (nbt.getBoolean(NBT_ASSIGNED) && !nbt.contains(NBT_AP_ITEM_NAME)) {
             ChestOpenHandler.maybeApplyCachedName(stack, nbt);
-            return;
         }
-
-        // Already fully processed
-        if (nbt.getBoolean(NBT_ASSIGNED) || nbt.getBoolean(NBT_SURPLUS)) return;
-
-        // Fallback assignment - for items picked up while offline or before
-        // ChestOpenHandler had slot data (chest was opened before AP connection)
-        if (!APSession.hasSlotData()) return;
-
-        int poolSize = APSession.getSlotData().getLootableChecks();
-        if (poolSize == 0) {
-            nbt.putBoolean(NBT_SURPLUS, true);
-            setCustomData(stack, nbt);
-            return;
-        }
-
-        MinecraftServer server = player.getServer();
-        if (server == null) return;
-
-        long locationId = LootableCheckState.get(server).assignNext(poolSize);
-
-        if (locationId < 0) {
-            nbt.putBoolean(NBT_SURPLUS, true);
-            setCustomData(stack, nbt);
-            return;
-        }
-
-        int n = (int)(locationId - SlotData.LOOTABLE_CHECK_BASE_ID) + 1;
-        nbt.putBoolean(NBT_ASSIGNED, true);
-        nbt.putLong(NBT_LOCATION_ID, locationId);
-        setCustomData(stack, nbt);
-
-        // Try cache immediately and request scout
-        ChestOpenHandler.maybeApplyCachedName(stack, getCustomData(stack));
-        ChestOpenHandler.requestScout(locationId);
-
-        player.sendMessage(
-                Text.empty()
-                        .append(Text.literal("⚡ ").formatted(Formatting.YELLOW))
-                        .append(Text.literal("Archipelago Loot #" + n)
-                                .formatted(Formatting.GOLD, Formatting.BOLD))
-                        .append(Text.literal(" found! Right-click to claim.")
-                                .formatted(Formatting.YELLOW)),
-                true
-        );
     }
 
     @Override
@@ -197,13 +144,10 @@ public class ArchipelagoCheckItem extends Item {
         ItemStack stack = user.getStackInHand(hand);
 
         if (world.isClient()) return TypedActionResult.success(stack);
-
-        if (!(user instanceof ServerPlayerEntity player))
-            return TypedActionResult.pass(stack);
+        if (!(user instanceof ServerPlayerEntity player)) return TypedActionResult.pass(stack);
 
         NbtCompound nbt = getCustomData(stack);
 
-        // Surplus
         if (nbt.getBoolean(NBT_SURPLUS)) {
             player.sendMessage(
                     Text.literal("All lootable checks have already been found.")
@@ -214,22 +158,49 @@ public class ArchipelagoCheckItem extends Item {
             return TypedActionResult.consume(stack);
         }
 
-        // Not yet assigned
         if (!nbt.getBoolean(NBT_ASSIGNED)) {
-            player.sendMessage(
-                    Text.empty()
-                            .append(Text.literal("⚡ ").formatted(Formatting.YELLOW))
-                            .append(Text.literal("Connect to Archipelago ")
-                                    .formatted(Formatting.WHITE))
-                            .append(Text.literal("first to claim this item.")
-                                    .formatted(Formatting.GRAY)),
-                    true
-            );
-            return TypedActionResult.pass(stack);
+            if (!APSession.hasSlotData()) {
+                player.sendMessage(
+                        Text.empty()
+                                .append(Text.literal("⚡ ").formatted(Formatting.YELLOW))
+                                .append(Text.literal("Connect to Archipelago ").formatted(Formatting.WHITE))
+                                .append(Text.literal("first to claim this item.").formatted(Formatting.GRAY)),
+                        true
+                );
+                return TypedActionResult.pass(stack);
+            }
+
+            MinecraftServer server = player.getServer();
+            if (server == null) return TypedActionResult.fail(stack);
+
+            int poolSize = APSession.getSlotData().getLootableChecks();
+            if (poolSize == 0) {
+                nbt.putBoolean(NBT_SURPLUS, true);
+                setCustomData(stack, nbt);
+            } else {
+                long locationId = LootableCheckState.get(server).assignNext(poolSize);
+                if (locationId < 0) {
+                    nbt.putBoolean(NBT_SURPLUS, true);
+                    setCustomData(stack, nbt);
+                } else {
+                    nbt.putBoolean(NBT_ASSIGNED, true);
+                    nbt.putLong(NBT_LOCATION_ID, locationId);
+                    setCustomData(stack, nbt);
+                    nbt = getCustomData(stack);
+                }
+            }
+
+            if (nbt.getBoolean(NBT_SURPLUS)) {
+                player.sendMessage(
+                        Text.literal("All lootable checks have already been found.")
+                                .formatted(Formatting.DARK_GRAY),
+                        true
+                );
+                stack.decrement(1);
+                return TypedActionResult.consume(stack);
+            }
         }
 
-        // Claim
-        // ── Claim ─────────────────────────────────────────────────────────────
         long locationId = nbt.getLong(NBT_LOCATION_ID);
         int n = checkNumber(nbt);
 
@@ -240,18 +211,14 @@ public class ArchipelagoCheckItem extends Item {
         boolean wasNew = checkedState.checkLocation(locationId);
 
         if (wasNew) {
-            // Dispatch to client thread for the AP call
             APSession.runtime().executeOnClient(() -> {
                 if (APSession.client().isConnected()) {
                     APSession.client().checkLocation(locationId);
                 }
-                // If offline: already stored in CheckedLocationsState and will be
-                // resent by APEvents.onConnected when the player reconnects.
             });
             VictoryCondition.checkAndAward(server);
         }
 
-        // Sound and chat confirmations
         player.playSoundToPlayer(
                 SoundEvents.ENTITY_EXPERIENCE_ORB_PICKUP, SoundCategory.PLAYERS, 1.0f, 1.0f
         );
@@ -259,20 +226,17 @@ public class ArchipelagoCheckItem extends Item {
         player.sendMessage(
                 Text.empty()
                         .append(Text.literal("⚡ ").formatted(Formatting.YELLOW))
-                        .append(Text.literal("Lootable Check #" + n)
-                                .formatted(Formatting.GOLD, Formatting.BOLD))
-                        .append(Text.literal(" sent to Archipelago!")
-                                .formatted(Formatting.YELLOW)),
+                        .append(Text.literal("Lootable Check #" + n).formatted(Formatting.GOLD, Formatting.BOLD))
+                        .append(Text.literal(" sent to Archipelago!").formatted(Formatting.YELLOW)),
                 false
         );
 
-        // Consume the item
         stack.decrement(1);
         return TypedActionResult.consume(stack);
     }
 
     private static int checkNumber(NbtCompound nbt) {
-        return (int)(nbt.getLong(NBT_LOCATION_ID) - SlotData.LOOTABLE_CHECK_BASE_ID) + 1;
+        return (int) (nbt.getLong(NBT_LOCATION_ID) - SlotData.LOOTABLE_CHECK_BASE_ID) + 1;
     }
 
     private static void appendSourceTooltip(NbtCompound nbt, List<Text> tooltip) {
@@ -283,15 +247,12 @@ public class ArchipelagoCheckItem extends Item {
                 .append(Text.literal(nbt.getString(NBT_LOOT_SOURCE_NAME)).formatted(Formatting.YELLOW)));
     }
 
-    // Returns the item's custom NBT data, or an empty compound if none exists.
     public static NbtCompound getCustomData(ItemStack stack) {
         NbtComponent component = stack.get(DataComponentTypes.CUSTOM_DATA);
         return component != null ? component.copyNbt() : new NbtCompound();
     }
 
-    // Writes a modified NBT compound back to the item's custom data component.
     public static void setCustomData(ItemStack stack, NbtCompound nbt) {
         stack.set(DataComponentTypes.CUSTOM_DATA, NbtComponent.of(nbt));
     }
-
 }
