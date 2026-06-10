@@ -3,7 +3,7 @@
     {
       "id": "structure_chests",
       "type": "loot_table",
-      "chance": 0.33,
+      "chance": 0.15,
       "display_name": "Structure Chest",
       "tables": [
         "minecraft:chests/village/village_armorer",
