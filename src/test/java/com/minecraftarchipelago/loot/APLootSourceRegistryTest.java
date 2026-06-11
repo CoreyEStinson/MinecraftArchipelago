@@ -19,17 +19,17 @@ class APLootSourceRegistryTest {
         List<APLootSource> sources = readBundledSources();
 
         assertChance(sources, "structure_chests", 0.33f);
-        assertChance(sources, "fishing", 0.04f);
+        assertChance(sources, "fishing", 0.1f);
         assertChance(sources, "piglin_bartering", 0.03f);
         assertChance(sources, "trial_vault", 0.20f);
         assertChance(sources, "trial_ominous_vault", 0.35f);
-        assertChance(sources, "villager_expert", 0.07f);
-        assertChance(sources, "villager_master", 0.15f);
-        assertChance(sources, "archaeology", 0.08f);
-        assertChance(sources, "mob_common", 0.01f);
-        assertChance(sources, "mob_uncommon", 0.03f);
-        assertChance(sources, "mob_rare", 0.05f);
-        assertChance(sources, "ender_dragon_death_fallback", 0.05f);
+        assertChance(sources, "villager_expert", 0.25f);
+        assertChance(sources, "villager_master", 0.5f);
+        assertChance(sources, "archaeology", 0.2f);
+        assertChance(sources, "mob_common", 0.02f);
+        assertChance(sources, "mob_uncommon", 0.06f);
+        assertChance(sources, "mob_rare", 0.1f);
+        assertChance(sources, "ender_dragon_death_fallback", 1f);
     }
 
     @Test
