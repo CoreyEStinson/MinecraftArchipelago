@@ -16,6 +16,7 @@ import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvents;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
+import com.minecraftarchipelago.network.LockedItemsSync;
 
 import java.util.Map;
 
@@ -188,6 +189,7 @@ public class APEvents {
             StageUnlockState state = StageUnlockState.get(server);
             if (state.unlock(serverPlayer.getUuid(), decision.stageId())) {
                 StageUnlockApplier.apply(serverPlayer, decision.stageId());
+                LockedItemsSync.send(serverPlayer);
             }
         }
     }

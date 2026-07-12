@@ -8,6 +8,9 @@
     "ItemCollectionMixin",
     "PlayerDeathMixin"
   ],
+  "client": [
+    "DrawContextMixin"
+  ],
   "injectors": {
     "defaultRequire": 1
   },

@@ -4,6 +4,7 @@ import com.minecraftarchipelago.MinecraftArchipelago;
 import com.minecraftarchipelago.apstages.StageRegistry;
 import com.minecraftarchipelago.apstages.service.StageUnlockApplier;
 import com.minecraftarchipelago.apstages.state.StageUnlockState;
+import com.minecraftarchipelago.network.LockedItemsSync;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.context.CommandContext;
@@ -112,6 +113,7 @@ public final class StageCommands {
         if (added) {
             source.sendFeedback(() -> Text.literal("Unlocked: " + stageId), false);
             StageUnlockApplier.apply(player, stageId);
+            LockedItemsSync.send(player);
         } else {
             source.sendFeedback(() -> Text.literal("Already unlocked: " + stageId), false);
         }

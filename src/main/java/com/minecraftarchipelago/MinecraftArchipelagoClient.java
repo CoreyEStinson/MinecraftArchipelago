@@ -1,8 +1,10 @@
 package com.minecraftarchipelago;
 
+import com.minecraftarchipelago.client.ClientLockedItems;
 import com.minecraftarchipelago.hud.APHudRenderer;
 import com.minecraftarchipelago.hud.APHudState;
 import com.minecraftarchipelago.hud.APWinConditionsRenderer;
+import com.minecraftarchipelago.network.LockedItemsPayload;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandManager;
@@ -12,6 +14,7 @@ import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
 import net.fabricmc.fabric.api.client.message.v1.ClientSendMessageEvents;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
+import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.option.KeyBinding;
 import net.minecraft.client.util.InputUtil;
@@ -23,6 +26,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.net.URISyntaxException;
+import java.util.HashSet;
 
 public class MinecraftArchipelagoClient implements ClientModInitializer
 {
@@ -35,6 +39,10 @@ public class MinecraftArchipelagoClient implements ClientModInitializer
     {
         APHudRenderer.register();
         APWinConditionsRenderer.register();
+
+        ClientPlayNetworking.registerGlobalReceiver(LockedItemsPayload.ID, (payload, context) -> {
+            ClientLockedItems.replace(new HashSet<>(payload.itemIds()));
+        });
 
         // Register the toggle keybind (default: H, changeable in Controls)
         KeyBinding hudToggleKey = KeyBindingHelper.registerKeyBinding(new KeyBinding(
@@ -190,6 +198,8 @@ public class MinecraftArchipelagoClient implements ClientModInitializer
             });
         });
         ClientPlayConnectionEvents.DISCONNECT.register((handler, client) -> {
+            ClientLockedItems.clear();
+
             if (APSession.CLIENT.isConnected()){
                 APSession.CLIENT.close();
             }

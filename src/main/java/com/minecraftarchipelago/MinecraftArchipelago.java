@@ -22,6 +22,9 @@ import com.minecraftarchipelago.loot.ChestOpenHandler;
 import com.minecraftarchipelago.loot.SetLootSourceFunction;
 import com.minecraftarchipelago.victory.*;
 import net.fabricmc.api.ModInitializer;
+import com.minecraftarchipelago.network.LockedItemsPayload;
+import com.minecraftarchipelago.network.LockedItemsSync;
+import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
 
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
 import net.fabricmc.fabric.api.resource.ResourceManagerHelper;
@@ -86,10 +89,17 @@ public class MinecraftArchipelago implements ModInitializer {
 		ResourceManagerHelper.get(ResourceType.SERVER_DATA)
 				.registerReloadListener(new APBossKillLocationsReloadListener());
 		BossKillListener.register();
-
+		PayloadTypeRegistry.playS2C().register(
+				LockedItemsPayload.ID,
+				LockedItemsPayload.CODEC
+		);
 		ServerPlayConnectionEvents.JOIN.register((handler, sender, server) -> {
 			ServerPlayerEntity player = handler.player;
-			server.execute(() -> applyBaseRulesOnFirstJoin(server, player));
+
+			server.execute(() -> {
+				applyBaseRulesOnFirstJoin(server, player);
+				LockedItemsSync.send(player);
+			});
 		});
 	}
 
