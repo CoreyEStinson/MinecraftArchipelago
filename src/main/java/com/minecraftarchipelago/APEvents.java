@@ -132,9 +132,8 @@ public class APEvents {
 
     @ArchipelagoEventListener
     public void onPrint(PrintJSONEvent e) {
-        int itemFlags = (e.item != null) ? e.item.flags : -1;
+        Text message = APMessageFormatter.build(APSession.CLIENT, e.apPrint);
 
-        Text message = APMessageFormatter.build(e.apPrint.getPlainText(), itemFlags);
         APSession.runtime().executeOnClient(() -> {
             var player = APSession.runtime().getCurrentPlayer();
             if (player != null) player.sendMessage(message);

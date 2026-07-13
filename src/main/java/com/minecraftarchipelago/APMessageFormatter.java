@@ -1,155 +1,109 @@
 package com.minecraftarchipelago;
 
+import io.github.archipelagomw.Print.APPrint;
+import io.github.archipelagomw.Print.APPrintColor;
+import io.github.archipelagomw.Print.APPrintPart;
 import io.github.archipelagomw.flags.NetworkItem;
 import net.minecraft.text.MutableText;
+import net.minecraft.text.Style;
 import net.minecraft.text.Text;
-import net.minecraft.util.Formatting;
 
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import java.awt.Color;
+import java.util.Map;
 
-/**
- * Converts Archipelago PrintJSON messages to colored Minecraft Text,
- * matching the color scheme used by the Archipelago text client:
- * <p>
- *   Player names   → YELLOW
- *   Items          → AQUA  (progression/unknown — BLUE if useful, RED if trap)
- *   Location names → GREEN
- *   Hints          → GOLD
- *   Join/Part      → GRAY
- *   [AP] prefix    → GOLD
- */
-public class APMessageFormatter {
+public final class APMessageFormatter {
+    // Priority-hint colors
+    private static final Map<String, Integer> GRAB_TYPES = Map.of(
+            "(priority)", 0xAF99EF,
+            "(no priority)", 0x6D8BE8,
+            "(avoid)", 0xE9786B
+    );
 
-    // --- Patterns ---
-    private static final Pattern PAT_FOUND = Pattern.compile(
-            "^(.+?) found (.+) \\(([^)]+)\\)(.*)$");
-
-    private static final Pattern PAT_SENT = Pattern.compile(
-            "^(.+?) sent (.+?) to (.+?) \\(([^)]+)\\)(.*)$");
-
-    // "Hint: ..."
-    private static final Pattern PAT_HINT = Pattern.compile(
-            "^Hint: (.+)$", Pattern.DOTALL);
-
-    // "PlayerName (GameName) has joined/left/finished..."
-    private static final Pattern PAT_STATUS = Pattern.compile(
-            "^(.+?) \\(.+?\\) has (?:joined|left|finished).*$");
-
-    // "[Tag]: message" — server/admin/command output
-    private static final Pattern PAT_SERVER = Pattern.compile(
-            "^(\\[.+?\\]: )(.*)$", Pattern.DOTALL);
-
-    // "PlayerName: chat message" — checked last to avoid catching join/part
-    private static final Pattern PAT_CHAT = Pattern.compile(
-            "^(\\S[^:]*): (.+)$", Pattern.DOTALL);
-
-    // --- Public Entry Point ---
-
-    /**
-     * Builds a colored Minecraft Text from the plain AP message string.
-     */
-    public static Text build(String plain, int itemFlags) {
-        if (plain == null || plain.isBlank()) return Text.empty();
-        Formatting itemColor = itemColor(itemFlags);
-
-        MutableText out = Text.empty();
-        out.append(Text.literal("[AP] ").formatted(Formatting.GOLD));
-
-        Matcher sent = PAT_SENT.matcher(plain);
-        if (sent.matches()) {
-            add(out, sent.group(1), Formatting.YELLOW);
-            add(out, " sent ",      Formatting.WHITE);
-            add(out, sent.group(2), itemColor);
-            add(out, " to ",        Formatting.WHITE);
-            add(out, sent.group(3), Formatting.YELLOW);
-            add(out, " (",          Formatting.GRAY);
-            add(out, sent.group(4), Formatting.GREEN);
-            add(out, ")",           Formatting.GRAY);
-            tail(out, sent.group(5));
-            return out;
+    public static Text build(APClient client, APPrint print) {
+        if (print == null || print.parts == null) {
+            return Text.empty();
         }
 
-        Matcher found = PAT_FOUND.matcher(plain);
-        if (found.matches()) {
-            add(out, found.group(1), Formatting.YELLOW);
-            add(out, " found ",      Formatting.WHITE);
-            add(out, found.group(2), itemColor);
-            add(out, " (",           Formatting.GRAY);
-            add(out, found.group(3), Formatting.GREEN);
-            add(out, ")",            Formatting.GRAY);
-            tail(out, found.group(4));
-            return out;
+        MutableText message = Text.empty();
+
+        for (APPrintPart part : print.parts) {
+            if (part == null || part.text == null || part.text.isEmpty()) {
+                continue;
+            }
+
+            APPrintColor partColor =
+                    part.color == null ? APPrintColor.none : part.color;
+
+            boolean underlined = partColor == APPrintColor.underline;
+            boolean bold = partColor == APPrintColor.bold;
+
+            int rgb = GRAB_TYPES.getOrDefault(
+                    part.text,
+                    getTextColor(client, part, partColor)
+            );
+
+            Style style = Style.EMPTY
+                    .withColor(rgb)
+                    .withUnderline(underlined)
+                    .withBold(bold);
+
+            message.append(Text.literal(part.text).setStyle(style));
         }
 
-        Matcher hint = PAT_HINT.matcher(plain);
-        if (hint.matches()) {
-            add(out, "Hint: ",      Formatting.GOLD);
-            add(out, hint.group(1), Formatting.WHITE);
-            return out;
-        }
-
-        Matcher status = PAT_STATUS.matcher(plain);
-        if (status.matches()) {
-            String name = status.group(1);
-            add(out, name,                              Formatting.YELLOW);
-            add(out, plain.substring(plain.indexOf(name) + name.length()), Formatting.GRAY);
-            return out;
-        }
-
-        Matcher server = PAT_SERVER.matcher(plain);
-        if (server.matches()) {
-            add(out, server.group(1), Formatting.GRAY);
-            add(out, server.group(2), Formatting.WHITE);
-            return out;
-        }
-
-        Matcher chat = PAT_CHAT.matcher(plain);
-        if (chat.matches()) {
-            add(out, chat.group(1), Formatting.YELLOW);
-            add(out, ": ",          Formatting.GRAY);
-            add(out, chat.group(2), Formatting.WHITE);
-            return out;
-        }
-
-        add(out, plain, Formatting.WHITE);
-        return out;
+        return message;
     }
 
-    public static Text build(String plain) {
-        return build(plain, -1);
-    }
+    private static int getTextColor(
+            APClient client,
+            APPrintPart part,
+            APPrintColor partColor
+    ) {
+        if (partColor == APPrintColor.none && part.type != null) {
+            return switch (part.type) {
+                case playerID, playerName ->
+                        client != null && client.getMyName().equals(part.text)
+                                ? 0xEE00EE  // Current player: magenta
+                                : 0xFAFAD2; // Other player: pale yellow
 
-    // --- Helpers ---
+                case locationID, locationName ->
+                        0x00FF7F; // Spring green
 
-    /**
-     * Maps NetworkItem flags to the matching AP text client color.
-     * <p>
-     *   TRAP        → RED   (traps stand out as dangerous)
-     *   USEFUL      → BLUE  (important but not progression-critical)
-     *   ADVANCEMENT → AQUA  (progression items — the most notable)
-     *   filler/none → WHITE (everything else is quiet)
-     *   unknown (-1)→ AQUA  (no info, default to progression color)
-     */
-    private static Formatting itemColor(int flags) {
-        if (flags < 0)                                    return Formatting.AQUA;
-        if ((flags & NetworkItem.TRAP) != 0)              return Formatting.RED;
-        if ((flags & NetworkItem.USEFUL) != 0)            return Formatting.BLUE;
-        if ((flags & NetworkItem.ADVANCEMENT) != 0)       return Formatting.AQUA;
-        return Formatting.WHITE; // filler
-    }
+                case entranceName ->
+                        0x6495ED; // Cornflower blue
 
-    private static void add(MutableText out, String text, Formatting fmt) {
-        if (text != null && !text.isEmpty()) {
-            out.append(Text.literal(text).formatted(fmt));
+                case itemID, itemName ->
+                        getItemColor(part.flags);
+
+                default ->
+                        0xFFFFFF;
+            };
         }
-    }
 
-    private static void tail(MutableText out, String text) {
-        if (text != null && !text.isBlank()) {
-            add(out, text, Formatting.GRAY);
+        // Explicit protocol colors; background colors are ignored.
+        if (partColor.name().endsWith("_bg")) {
+            return 0xFFFFFF;
         }
+
+        Color color = partColor.color;
+        return color.getRGB() & 0xFFFFFF;
     }
 
-    private APMessageFormatter() {}
+    private static int getItemColor(int flags) {
+        if (hasFlag(flags, NetworkItem.ADVANCEMENT)) {
+            return 0xAF99EF; // Progression: lavender
+        }
+
+        if (hasFlag(flags, NetworkItem.TRAP)) {
+            return 0xE9786B; // Trap: salmon
+        }
+
+        return 0x6D8BE8; // Filler/useful: blue
+    }
+
+    private static boolean hasFlag(int flags, int flag) {
+        return (flags & flag) == flag;
+    }
+
+    private APMessageFormatter() {
+    }
 }
