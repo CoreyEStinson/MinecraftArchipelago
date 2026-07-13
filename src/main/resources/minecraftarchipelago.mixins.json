@@ -4,6 +4,7 @@
   "compatibilityLevel": "JAVA_21",
   "mixins": [
     "AdvancementLocationMixin",
+    "CraftingOutputSlotMixin",
     "ExampleMixin",
     "ItemCollectionMixin",
     "PlayerDeathMixin"

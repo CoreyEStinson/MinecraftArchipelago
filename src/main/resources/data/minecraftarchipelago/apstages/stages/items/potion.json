@@ -1,7 +1,11 @@
 {
   "items": {
     "lock": [],
-    "unlock": [ "#minecraft:potion" ]
+    "unlock": [
+      "minecraft:potion",
+      "minecraft:splash_potion",
+      "minecraft:lingering_potion"
+    ]
   },
   "world":  { "gamerules": {} },
   "grants": { "packages": [] }

@@ -27,7 +27,7 @@
       "minecraft:milk_bucket",   "minecraft:water_bucket",
       "minecraft:axolotl_bucket","minecraft:powder_snow_bucket",
       "minecraft:name_tag",      "minecraft:ominous_bottle",
-      "#minecraft:potion",        "minecraft:splash_potion",
+      "minecraft:potion",        "minecraft:splash_potion",
       "minecraft:lingering_potion",
       "minecraft:shield",        "minecraft:spyglass",
       "minecraft:totem_of_undying","minecraft:turtle_helmet",
