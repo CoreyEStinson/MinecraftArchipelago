@@ -5,7 +5,7 @@ import java.util.*;
 
 public final class APHudState {
 
-    public static boolean visible = true;
+    public static boolean visible = false;
     public static boolean winConditionsVisible = false;
 
     // --- Connection ---

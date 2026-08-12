@@ -1,7 +1,9 @@
 package com.minecraftarchipelago.mixin;
 
 import com.minecraftarchipelago.client.ClientLockedItems;
+import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawContext;
+import net.minecraft.client.gui.screen.ingame.HandledScreen;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.world.World;
@@ -37,6 +39,13 @@ public abstract class DrawContextMixin {
             int z,
             CallbackInfo ci
     ) {
+        MinecraftClient client = MinecraftClient.getInstance();
+
+        if (client.currentScreen != null
+                && !(client.currentScreen instanceof HandledScreen<?>)) {
+            return;
+        }
+
         if (!ClientLockedItems.isLocked(stack)) {
             return;
         }

@@ -1,6 +1,8 @@
 package com.minecraftarchipelago;
 
 import com.minecraftarchipelago.client.ClientLockedItems;
+import com.minecraftarchipelago.dashboard.ArchipelagoDashboardScreen;
+import com.minecraftarchipelago.dashboard.DashboardPreferences;
 import com.minecraftarchipelago.hud.APHudRenderer;
 import com.minecraftarchipelago.hud.APHudState;
 import com.minecraftarchipelago.hud.APWinConditionsRenderer;
@@ -37,6 +39,8 @@ public class MinecraftArchipelagoClient implements ClientModInitializer
     @Override
     public void onInitializeClient()
     {
+        DashboardPreferences.load();
+
         APHudRenderer.register();
         APWinConditionsRenderer.register();
 
@@ -44,19 +48,18 @@ public class MinecraftArchipelagoClient implements ClientModInitializer
             ClientLockedItems.replace(new HashSet<>(payload.itemIds()));
         });
 
-        // Register the toggle keybind (default: H, changeable in Controls)
-        KeyBinding hudToggleKey = KeyBindingHelper.registerKeyBinding(new KeyBinding(
-                "Toggle Hud",
+        KeyBinding dashboardKey = KeyBindingHelper.registerKeyBinding(new KeyBinding(
+                "Open Archipelago Dashboard",
                 InputUtil.Type.KEYSYM,
                 GLFW.GLFW_KEY_H,
                 "Archipelago"
         ));
 
-        // Check the key every tick and toggle visibility
         ClientTickEvents.END_CLIENT_TICK.register(client -> {
-            while (hudToggleKey.wasPressed()) {
-                APHudState.visible = !APHudState.visible;
-                APHudRenderer.saveConfig();
+            while (dashboardKey.wasPressed()) {
+                if (client.world != null && client.currentScreen == null) {
+                    client.setScreen(new ArchipelagoDashboardScreen());
+                }
             }
         });
 
@@ -111,7 +114,7 @@ public class MinecraftArchipelagoClient implements ClientModInitializer
                                     var source = ctx.getSource();
                                     String address = StringArgumentType.getString(ctx, "address");
                                     String port = StringArgumentType.getString(ctx, "port");
-                                    
+
                                     // Default slot = Minecraft username
                                     String slot = source.getPlayer().getName().getString();
                                     joinAp(source, address, port, slot, null);
@@ -205,6 +208,111 @@ public class MinecraftArchipelagoClient implements ClientModInitializer
             }
             APSession.clearSlotData();
         });
+    }
+
+    public static void connectFromDashboard(
+            MinecraftClient client,
+            String address,
+            String port,
+            String slot,
+            String password
+    ) {
+        if (address.isBlank() || port.isBlank() || slot.isBlank()) {
+            if (client.player != null) {
+                client.player.sendMessage(
+                        Text.literal("[AP] Address, port, and slot are required")
+                                .formatted(Formatting.RED)
+                );
+            }
+
+            return;
+        }
+
+        APSession.setPendingCredentials(address, port, slot, password);
+        APSession.ensureListeners();
+
+        APSession.CLIENT.setGame("Minecraft Archipelago");
+        APSession.CLIENT.setName(slot);
+        APSession.slotName = slot;
+        APSession.CLIENT.setItemsHandlingFlags(7);
+
+        if (password != null && !password.isBlank()) {
+            APSession.CLIENT.setPassword(password);
+        }
+
+        if (APSession.CLIENT.isConnected()) {
+            APSession.CLIENT.close();
+        }
+
+        if (client.player != null) {
+            client.player.sendMessage(
+                    Text.literal("[AP] Connecting to " + address + " as " + slot + "...")
+                            .formatted(Formatting.YELLOW)
+            );
+        }
+
+        new Thread(() -> {
+            try {
+                APSession.CLIENT.connect(address + ":" + port);
+            } catch (URISyntaxException exception) {
+                client.execute(() -> {
+                    if (client.player != null) {
+                        client.player.sendMessage(
+                                Text.literal("[AP] Invalid address or port.")
+                                        .formatted(Formatting.RED)
+                        );
+                    }
+                });
+                return;
+            } catch (Exception exception) {
+                client.execute(() -> {
+                    if (client.player != null) {
+                        client.player.sendMessage(
+                                Text.literal("[AP] Connection failed: " + exception.getMessage())
+                                        .formatted(Formatting.RED)
+                        );
+                    }
+                });
+                return;
+            }
+
+            for (int attempt = 0; attempt < 50; attempt++) {
+                if (APSession.CLIENT.isConnected()) {
+                    return;
+                }
+
+                try {
+                    Thread.sleep(100);
+                } catch (InterruptedException ignored) {
+                    Thread.currentThread().interrupt();
+                    return;
+                }
+            }
+
+            client.execute(() -> {
+                if (client.player != null) {
+                    client.player.sendMessage(
+                            Text.literal("[AP] Timed out waiting for Archipelago.")
+                                    .formatted(Formatting.RED)
+                    );
+                }
+            });
+        }, "Archipelago-Dashboard-Join").start();
+    }
+
+    public static void disconnectFromDashboard(MinecraftClient client) {
+        if (APSession.CLIENT != null && APSession.CLIENT.isConnected()) {
+            APSession.CLIENT.close();
+        }
+
+        APSession.clearSlotData();
+
+        if (client.player != null) {
+            client.player.sendMessage(
+                    Text.literal("[AP] Disconnected from Archipelago.")
+                            .formatted(Formatting.YELLOW)
+            );
+        }
     }
 
     private static void joinAp(FabricClientCommandSource source, String address, String port, String slot, String password) {

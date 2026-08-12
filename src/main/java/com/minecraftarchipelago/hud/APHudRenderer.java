@@ -83,7 +83,6 @@ public final class APHudRenderer {
         CheckedLocationsState locs = CheckedLocationsState.get(server);
 
         APHudState.locationsChecked = locs.checkedCount();
-        APHudState.locationsTotal   = LocationRegistry.size();
         APHudState.goalAchieved     = locs.isGoalAchieved();
 
         // ── Boss kills ────────────────────────────────────────────────────────
@@ -117,12 +116,16 @@ public final class APHudRenderer {
                 SlotData.LOOTABLE_CHECK_BASE_ID + APHudState.lootableChecksTotal
         );
 
+        APHudState.locationsTotal = LocationRegistry.size()
+                + BossKillLocationRegistry.size()
+                + APHudState.lootableChecksTotal;
+
         // ── Advancement counts ────────────────────────────────────────────────
         // Advancements = everything that isn't a boss kill or lootable check
         APHudState.advancementsChecked = APHudState.locationsChecked
                 - APHudState.bossKillsChecked
                 - APHudState.lootableChecksFound;
-        APHudState.advancementsTotal = APHudState.locationsTotal;
+        APHudState.advancementsTotal = LocationRegistry.size();
 
         // ── Goal percent (for advancement bar marker) ─────────────────────────
         if (APSession.hasSlotData()) {

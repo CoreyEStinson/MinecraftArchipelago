@@ -6,6 +6,7 @@ import com.minecraftarchipelago.aplocations.CheckedLocationsState;
 import com.minecraftarchipelago.aplocations.VictoryCondition;
 import com.minecraftarchipelago.apstages.service.StageUnlockApplier;
 import com.minecraftarchipelago.apstages.state.StageUnlockState;
+import com.minecraftarchipelago.dashboard.ReceiptHistoryRecorder;
 import io.github.archipelagomw.events.*;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
@@ -81,7 +82,14 @@ public class APEvents {
                         server.getPlayerManager().getPlayer(currentPlayer.getName().getString());
                 if (serverPlayer == null) return;
 
-                handleReceivedItem(server, serverPlayer, apItemId, itemIndex);
+                handleReceivedItem(
+                        server,
+                        serverPlayer,
+                        apItemId,
+                        itemIndex,
+                        e.getItemName(),
+                        e.getPlayerName()
+                );
             });
         });
     }
@@ -157,11 +165,41 @@ public class APEvents {
         });
     }
 
-    static void handleReceivedItem(MinecraftServer server,
-                                   ServerPlayerEntity serverPlayer,
-                                   long apItemId,
-                                   int itemIndex) {
-        ReceivedItemDecision decision = decideReceivedItem(server, serverPlayer.getUuid(), apItemId, itemIndex);
+    static void handleReceivedItem(
+            MinecraftServer server,
+            ServerPlayerEntity serverPlayer,
+            long apItemId,
+            int itemIndex
+    ) {
+        handleReceivedItem(
+                server,
+                serverPlayer,
+                apItemId,
+                itemIndex,
+                "Unknown item",
+                ""
+        );
+    }
+
+    private static void handleReceivedItem(
+            MinecraftServer server,
+            ServerPlayerEntity serverPlayer,
+            long apItemId,
+            int itemIndex,
+            String itemName,
+            String sender
+    ) {
+        ReceiptHistoryRecorder.record(
+                server,
+                apItemId,
+                itemIndex,
+                itemName,
+                sender
+        );
+
+        ReceivedItemDecision decision =
+                decideReceivedItem(server, serverPlayer.getUuid(), apItemId, itemIndex);
+
         if (decision.duplicate()) {
             MinecraftArchipelago.LOGGER.info("[AP] -> index {} already processed, skipping", itemIndex);
             return;

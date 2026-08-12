@@ -23,4 +23,9 @@ public final class LocationRegistry {
     public static int size() {
         return ADVANCEMENT_LOCATIONS.size();
     }
+
+    public static Map<Identifier, Long> getAll() {
+        return Map.copyOf(ADVANCEMENT_LOCATIONS);
+    }
+
 }

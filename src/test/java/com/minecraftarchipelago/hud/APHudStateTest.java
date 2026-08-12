@@ -12,7 +12,7 @@ class APHudStateTest {
     @Test
     void testAPHudStateStaticFields() {
         // Test that static fields are accessible and have expected default values
-        assertTrue(APHudState.visible);
+        assertFalse(APHudState.visible);
         assertFalse(APHudState.connected);
         assertEquals("—", APHudState.address);
         assertEquals(0, APHudState.locationsChecked);
