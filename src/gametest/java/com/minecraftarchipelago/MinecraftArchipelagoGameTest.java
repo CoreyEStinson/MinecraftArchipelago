@@ -62,7 +62,7 @@ public final class MinecraftArchipelagoGameTest implements FabricGameTest {
                 "required_boss_kills", List.of(),
                 "required_item_collections", List.of()
         )));
-        CheckedLocationsState.get(server).checkLocation(42002L);
+        CheckedLocationsState.get(server).checkLocation(20001L);
 
         AdvancementLocationHandler.handleCompletedAdvancement(
                 server,
@@ -70,9 +70,9 @@ public final class MinecraftArchipelagoGameTest implements FabricGameTest {
                 Identifier.ofVanilla("story/mine_stone")
         );
 
-        context.assertTrue(CheckedLocationsState.get(server).isLocationChecked(42001L), "Completing mine_stone should mark its AP location as checked.");
+        context.assertTrue(CheckedLocationsState.get(server).isLocationChecked(20000L), "Completing mine_stone should mark its AP location as checked.");
         context.assertTrue(CheckedLocationsState.get(server).isGoalAchieved(), "Completing the final required advancement should award victory.");
-        context.assertTrue(client.checkedLocations.contains(42001L), "Advancement completion should notify Archipelago about the checked location.");
+        context.assertTrue(client.checkedLocations.contains(20000L), "Advancement completion should notify Archipelago about the checked location.");
         context.assertTrue(client.gameStates.contains(ClientStatus.CLIENT_GOAL), "Advancement victory should send CLIENT_GOAL.");
         context.complete();
     }
@@ -93,9 +93,9 @@ public final class MinecraftArchipelagoGameTest implements FabricGameTest {
 
         BossKillListener.handleBossKill(server, SlotData.getBossLocationId("warden"));
 
-        context.assertTrue(CheckedLocationsState.get(server).isLocationChecked(42122L), "A required boss kill should mark its AP location as checked.");
+        context.assertTrue(CheckedLocationsState.get(server).isLocationChecked(21003L), "A required boss kill should mark its AP location as checked.");
         context.assertTrue(CheckedLocationsState.get(server).isGoalAchieved(), "Killing the final required boss should award victory.");
-        context.assertTrue(client.checkedLocations.contains(42122L), "Boss kills should notify Archipelago about the checked location.");
+        context.assertTrue(client.checkedLocations.contains(21003L), "Boss kills should notify Archipelago about the checked location.");
         context.assertTrue(client.gameStates.contains(ClientStatus.CLIENT_GOAL), "Boss-kill victory should send CLIENT_GOAL.");
         context.complete();
     }
@@ -274,19 +274,21 @@ public final class MinecraftArchipelagoGameTest implements FabricGameTest {
         resetHooks(new RecordingClientFacade(), new ImmediateRuntimeFacade(server, null));
         resetServerState(server);
 
-        APEvents.handleReceivedItem(server, player, 43000L, 100);
-        APEvents.handleReceivedItem(server, player, 43000L, 101);
-        APEvents.handleReceivedItem(server, player, 43000L, 102);
-        APEvents.handleReceivedItem(server, player, 43000L, 103);
-        int sizeAfterFourthReceipt = StageUnlockState.get(server).getUnlocked(player.getUuid()).size();
-        APEvents.handleReceivedItem(server, player, 43000L, 104);
+        APEvents.handleReceivedItem(server, player, 10000L, 100);
+        APEvents.handleReceivedItem(server, player, 10000L, 101);
+        APEvents.handleReceivedItem(server, player, 10000L, 102);
+        APEvents.handleReceivedItem(server, player, 10000L, 103);
+        APEvents.handleReceivedItem(server, player, 10000L, 104);
+        int sizeAfterFifthReceipt = StageUnlockState.get(server).getUnlocked(player.getUuid()).size();
+        APEvents.handleReceivedItem(server, player, 10000L, 105);
 
         var unlocked = StageUnlockState.get(server).getUnlocked(player.getUuid());
         context.assertTrue(unlocked.contains(Identifier.of("minecraftarchipelago", "tools/stone_tools")), "Stone tools should unlock first.");
-        context.assertTrue(unlocked.contains(Identifier.of("minecraftarchipelago", "tools/iron_tools")), "Iron tools should unlock second.");
-        context.assertTrue(unlocked.contains(Identifier.of("minecraftarchipelago", "tools/diamond_tools")), "Diamond tools should unlock third.");
-        context.assertTrue(unlocked.contains(Identifier.of("minecraftarchipelago", "tools/netherite_tools")), "Netherite tools should unlock fourth.");
-        context.assertTrue(unlocked.size() == sizeAfterFourthReceipt, "A fifth progressive receipt should not unlock an extra tier.");
+        context.assertTrue(unlocked.contains(Identifier.of("minecraftarchipelago", "tools/golden_tools")), "Golden tools should unlock second.");
+        context.assertTrue(unlocked.contains(Identifier.of("minecraftarchipelago", "tools/iron_tools")), "Iron tools should unlock third.");
+        context.assertTrue(unlocked.contains(Identifier.of("minecraftarchipelago", "tools/diamond_tools")), "Diamond tools should unlock fourth.");
+        context.assertTrue(unlocked.contains(Identifier.of("minecraftarchipelago", "tools/netherite_tools")), "Netherite tools should unlock fifth.");
+        context.assertTrue(unlocked.size() == sizeAfterFifthReceipt, "A sixth progressive receipt should not unlock an extra tier.");
         context.complete();
     }
 
