@@ -116,7 +116,6 @@ public class MinecraftArchipelagoClient implements ClientModInitializer
             .then(ClientCommandManager.literal("leave").executes(ctx -> {
                 APSession.CLIENT.close();
                 APSession.clearSlotData();
-                ctx.getSource().sendFeedback(Text.literal("Disconnected from Archipelago."));
 
                 MinecraftServer server = ctx.getSource().getClient().getServer();
                 if (server != null){
@@ -273,13 +272,6 @@ public class MinecraftArchipelagoClient implements ClientModInitializer
         }
 
         APSession.clearSlotData();
-
-        if (client.player != null) {
-            client.player.sendMessage(
-                    Text.literal("[AP] Disconnected from Archipelago.")
-                            .formatted(Formatting.YELLOW)
-            );
-        }
     }
 
     private static void joinAp(FabricClientCommandSource source, String address, String port, String slot, String password) {
@@ -389,12 +381,9 @@ public class MinecraftArchipelagoClient implements ClientModInitializer
         mc.execute(() -> {
             var player = mc.player;
             if (player == null) return;
-            if (attempt == 0) return;
+            if (attempt != 1) return;
             player.sendMessage(
-                    Text.literal(String.format(
-                            "[AP] Reconnecting... (attempt %d/%d, waiting %ds)",
-                            attempt, maxAttempts, delaySeconds
-                    )).formatted(Formatting.YELLOW),
+                    Text.literal("[AP] Reconnecting...").formatted(Formatting.YELLOW),
                     true
             );
         });

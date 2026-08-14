@@ -47,9 +47,7 @@ public class StageUnlockApplier
         if (value == null || value.isBlank()) return;
         
         String command = "gamerule " + ruleName + " " + value;
-        server.getCommandManager().executeWithPrefix(server.getCommandSource(), command);
-        
-        player.sendMessage(Text.literal("Applied gamerule: " + ruleName + "=" + value), false);
+        server.getCommandManager().executeWithPrefix(server.getCommandSource().withSilent(), command);
     }
 
     private static void grantPackages(ServerPlayerEntity player, StageDef stage){
@@ -83,7 +81,6 @@ public class StageUnlockApplier
         for (ItemGrant entry : pack.items()) {
             giveItem(player, entry);
         }
-        player.sendMessage(Text.literal("Granted package: " + packageID));
     }
     
     private static void giveItem(ServerPlayerEntity player, ItemGrant entry){

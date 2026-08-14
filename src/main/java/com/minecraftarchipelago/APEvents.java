@@ -12,6 +12,10 @@ import com.minecraftarchipelago.dashboard.ReceiptHistoryRecorder;
 import io.github.archipelagomw.events.*;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.enchantment.Enchantment;
+import net.minecraft.registry.RegistryKey;
+import net.minecraft.registry.RegistryKeys;
+import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.registry.Registries;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayerEntity;
@@ -211,6 +215,19 @@ public class APEvents {
             MinecraftArchipelago.LOGGER.info("[AP] -> give item found");
             Item item = Registries.ITEM.get(decision.giveEntry().itemId());
             ItemStack stack = new ItemStack(item, decision.giveEntry().count());
+            if (decision.giveEntry().enchantmentId() != null) {
+                RegistryKey<Enchantment> enchantmentKey = RegistryKey.of(
+                        RegistryKeys.ENCHANTMENT,
+                        decision.giveEntry().enchantmentId()
+                );
+                RegistryEntry<Enchantment> enchantment = server.getRegistryManager()
+                        .getWrapperOrThrow(RegistryKeys.ENCHANTMENT)
+                        .getOptional(enchantmentKey)
+                        .orElse(null);
+                if (enchantment != null) {
+                    stack.addEnchantment(enchantment, decision.giveEntry().enchantmentLevel());
+                }
+            }
             if (!serverPlayer.getInventory().insertStack(stack)) {
                 serverPlayer.dropItem(stack, false);
             }

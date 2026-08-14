@@ -58,6 +58,6 @@
     { "ap_item_id": 14055, "minecraft_item": "minecraft:painting",      "count": 1 },
     { "ap_item_id": 14056, "minecraft_item": "minecraft:ink_sac",       "count": 8 },
     { "ap_item_id": 14057, "minecraft_item": "minecraft:red_dye",       "count": 8 },
-    { "ap_item_id": 14058, "minecraft_item": "minecraft:enchanted_book","count": 1 }
+    { "ap_item_id": 14058, "minecraft_item": "minecraft:enchanted_book", "count": 1, "enchantment": "minecraft:binding_curse" }
   ]
 }

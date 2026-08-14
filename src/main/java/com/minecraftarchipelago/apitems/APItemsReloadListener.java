@@ -73,7 +73,15 @@ public class APItemsReloadListener implements SimpleSynchronousResourceReloadLis
                 long id = obj.get("ap_item_id").getAsLong();
                 Identifier itemId = Identifier.tryParse(obj.get("minecraft_item").getAsString());
                 int count = obj.has("count") ? obj.get("count").getAsInt() : 1;
-                if (itemId != null && count > 0) APGiveItemRegistry.put(id, itemId, count);
+                Identifier enchantmentId = obj.has("enchantment")
+                        ? Identifier.tryParse(obj.get("enchantment").getAsString())
+                        : null;
+                int enchantmentLevel = obj.has("enchantment_level")
+                        ? obj.get("enchantment_level").getAsInt()
+                        : 1;
+                if (itemId != null && count > 0) {
+                    APGiveItemRegistry.put(id, itemId, count, enchantmentId, enchantmentLevel);
+                }
             }
         });
     }

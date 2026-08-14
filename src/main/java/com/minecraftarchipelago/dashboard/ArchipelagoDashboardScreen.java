@@ -19,12 +19,12 @@ public final class ArchipelagoDashboardScreen extends Screen {
     private static final int TAB_WIDTH = 68;
 
     private enum Page {
-        OVERVIEW("◆ Overview"),
-        GOALS("☑ Goals"),
-        PROGRESS("▥ Progress"),
-        UNLOCKS("⬡ Unlocks"),
-        ITEMS("▣ Items"),
-        SETTINGS("⚙ Settings");
+        OVERVIEW("Overview"),
+        GOALS("Goals"),
+        PROGRESS("Progress"),
+        UNLOCKS("Unlocks"),
+        ITEMS("Items"),
+        SETTINGS("Settings");
 
         private final String label;
 

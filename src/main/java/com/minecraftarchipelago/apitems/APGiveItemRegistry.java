@@ -7,14 +7,20 @@ import java.util.Map;
 
 public final class APGiveItemRegistry {
 
-    public record GiveEntry(Identifier itemId, int count) {}
+    public record GiveEntry(Identifier itemId, int count, Identifier enchantmentId, int enchantmentLevel) {}
 
     private static final Map<Long, GiveEntry> GIVE_ITEMS = new HashMap<>();
 
     public static void clear() { GIVE_ITEMS.clear(); }
 
-    public static void put(long apItemId, Identifier itemId, int count) {
-        GIVE_ITEMS.put(apItemId, new GiveEntry(itemId, count));
+    public static void put(
+            long apItemId,
+            Identifier itemId,
+            int count,
+            Identifier enchantmentId,
+            int enchantmentLevel
+    ) {
+        GIVE_ITEMS.put(apItemId, new GiveEntry(itemId, count, enchantmentId, enchantmentLevel));
     }
 
     public static GiveEntry getEntry(long apItemId){
