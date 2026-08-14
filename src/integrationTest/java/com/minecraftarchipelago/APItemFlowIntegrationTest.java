@@ -50,7 +50,7 @@ class APItemFlowIntegrationTest {
             checkedStateMock.when(() -> CheckedLocationsState.get(server)).thenReturn(checkedState);
 
             APEvents.ReceivedItemDecision decision =
-                    APEvents.decideReceivedItem(server, UUID.randomUUID(), 43051L, 7);
+                    APEvents.decideReceivedItem(server, UUID.randomUUID(), 14000L, 7);
 
             assertFalse(decision.duplicate());
             assertEquals(Identifier.ofVanilla("beetroot"), decision.giveEntry().itemId());
@@ -71,7 +71,7 @@ class APItemFlowIntegrationTest {
             checkedStateMock.when(() -> CheckedLocationsState.get(server)).thenReturn(checkedState);
 
             APEvents.ReceivedItemDecision decision =
-                    APEvents.decideReceivedItem(server, UUID.randomUUID(), 43018L, 1);
+                    APEvents.decideReceivedItem(server, UUID.randomUUID(), 11016L, 1);
 
             assertFalse(decision.duplicate());
             assertNull(decision.giveEntry());
@@ -86,15 +86,17 @@ class APItemFlowIntegrationTest {
         StageUnlockState unlockState = mock(StageUnlockState.class);
         UUID playerId = UUID.randomUUID();
         Identifier stone = Identifier.of("minecraftarchipelago", "tools/stone_tools");
+        Identifier golden = Identifier.of("minecraftarchipelago", "tools/golden_tools");
         Identifier iron = Identifier.of("minecraftarchipelago", "tools/iron_tools");
         Identifier diamond = Identifier.of("minecraftarchipelago", "tools/diamond_tools");
         Identifier netherite = Identifier.of("minecraftarchipelago", "tools/netherite_tools");
         var unlockedSnapshots = java.util.List.of(
                 Set.<Identifier>of(),
                 Set.of(stone),
-                Set.of(stone, iron),
-                Set.of(stone, iron, diamond),
-                Set.of(stone, iron, diamond, netherite)
+                Set.of(stone, golden),
+                Set.of(stone, golden, iron),
+                Set.of(stone, golden, iron, diamond),
+                Set.of(stone, golden, iron, diamond, netherite)
         );
         AtomicInteger snapshotIndex = new AtomicInteger();
 
@@ -107,11 +109,12 @@ class APItemFlowIntegrationTest {
             checkedStateMock.when(() -> CheckedLocationsState.get(server)).thenReturn(checkedState);
             unlockStateMock.when(() -> StageUnlockState.get(server)).thenReturn(unlockState);
 
-            assertEquals(stone, APEvents.decideReceivedItem(server, playerId, 43000L, 10).stageId());
-            assertEquals(iron, APEvents.decideReceivedItem(server, playerId, 43000L, 11).stageId());
-            assertEquals(diamond, APEvents.decideReceivedItem(server, playerId, 43000L, 12).stageId());
-            assertEquals(netherite, APEvents.decideReceivedItem(server, playerId, 43000L, 13).stageId());
-            assertNull(APEvents.decideReceivedItem(server, playerId, 43000L, 14).stageId());
+            assertEquals(stone, APEvents.decideReceivedItem(server, playerId, 10000L, 10).stageId());
+            assertEquals(golden, APEvents.decideReceivedItem(server, playerId, 10000L, 11).stageId());
+            assertEquals(iron, APEvents.decideReceivedItem(server, playerId, 10000L, 12).stageId());
+            assertEquals(diamond, APEvents.decideReceivedItem(server, playerId, 10000L, 13).stageId());
+            assertEquals(netherite, APEvents.decideReceivedItem(server, playerId, 10000L, 14).stageId());
+            assertNull(APEvents.decideReceivedItem(server, playerId, 10000L, 15).stageId());
         }
     }
 
@@ -127,7 +130,7 @@ class APItemFlowIntegrationTest {
             checkedStateMock.when(() -> CheckedLocationsState.get(server)).thenReturn(checkedState);
 
             APEvents.ReceivedItemDecision decision =
-                    APEvents.decideReceivedItem(server, UUID.randomUUID(), 43018L, 3);
+                    APEvents.decideReceivedItem(server, UUID.randomUUID(), 11016L, 3);
 
             assertTrue(decision.duplicate());
             assertNull(decision.giveEntry());

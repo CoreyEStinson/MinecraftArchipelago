@@ -3,9 +3,7 @@ package com.minecraftarchipelago;
 import com.minecraftarchipelago.client.ClientLockedItems;
 import com.minecraftarchipelago.dashboard.ArchipelagoDashboardScreen;
 import com.minecraftarchipelago.dashboard.DashboardPreferences;
-import com.minecraftarchipelago.hud.APHudRenderer;
-import com.minecraftarchipelago.hud.APHudState;
-import com.minecraftarchipelago.hud.APWinConditionsRenderer;
+import com.minecraftarchipelago.dashboard.DashboardProgressTracker;
 import com.minecraftarchipelago.network.LockedItemsPayload;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import net.fabricmc.api.ClientModInitializer;
@@ -41,8 +39,7 @@ public class MinecraftArchipelagoClient implements ClientModInitializer
     {
         DashboardPreferences.load();
 
-        APHudRenderer.register();
-        APWinConditionsRenderer.register();
+        DashboardProgressTracker.register();
 
         ClientPlayNetworking.registerGlobalReceiver(LockedItemsPayload.ID, (payload, context) -> {
             ClientLockedItems.replace(new HashSet<>(payload.itemIds()));
@@ -59,36 +56,6 @@ public class MinecraftArchipelagoClient implements ClientModInitializer
             while (dashboardKey.wasPressed()) {
                 if (client.world != null && client.currentScreen == null) {
                     client.setScreen(new ArchipelagoDashboardScreen());
-                }
-            }
-        });
-
-        // G: toggle win conditions panel
-        KeyBinding winCondKey = KeyBindingHelper.registerKeyBinding(new KeyBinding(
-                "Toggle Win Conditions",
-                InputUtil.Type.KEYSYM,
-                GLFW.GLFW_KEY_G,
-                "Archipelago"
-        ));
-
-        // V: toggle expanded item detail within the win conditions panel
-        KeyBinding detailKey = KeyBindingHelper.registerKeyBinding(new KeyBinding(
-                "Toggle Collection Details",
-                InputUtil.Type.KEYSYM,
-                GLFW.GLFW_KEY_V,
-                "Archipelago"
-        ));
-
-        ClientTickEvents.END_CLIENT_TICK.register(client -> {
-            while (winCondKey.wasPressed()) {
-                APHudState.winConditionsVisible = !APHudState.winConditionsVisible;
-                // Collapse expanded view whenever the panel is closed
-                if (!APHudState.winConditionsVisible) APHudState.expandedView = false;
-            }
-            while (detailKey.wasPressed()) {
-                // Only meaningful when the win conditions panel is open
-                if (APHudState.winConditionsVisible) {
-                    APHudState.expandedView = !APHudState.expandedView;
                 }
             }
         });

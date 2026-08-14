@@ -9,7 +9,7 @@ import com.minecraftarchipelago.dashboard.ReceiptHistoryState;
 import com.minecraftarchipelago.dashboard.ReceiptKind;
 import com.minecraftarchipelago.dashboard.ReceiptRecord;
 import com.minecraftarchipelago.dashboard.ReceiptRowRenderer;
-import com.minecraftarchipelago.hud.APHudState;
+import com.minecraftarchipelago.dashboard.DashboardProgressState;
 import com.minecraftarchipelago.victory.VictoryProgress;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.font.TextRenderer;
@@ -101,7 +101,7 @@ public class OverviewTab extends ScrollableDashboardTab {
                 COLOR_TEXT
         );
 
-        String totalText = APHudState.locationsChecked + " / " + APHudState.locationsTotal;
+        String totalText = DashboardProgressState.locationsChecked + " / " + DashboardProgressState.locationsTotal;
 
         context.drawTextWithShadow(
                 textRenderer,
@@ -116,8 +116,8 @@ public class OverviewTab extends ScrollableDashboardTab {
                 x,
                 y + 11,
                 width,
-                APHudState.locationsChecked,
-                APHudState.locationsTotal
+                DashboardProgressState.locationsChecked,
+                DashboardProgressState.locationsTotal
         );
 
         y += 24;
@@ -132,7 +132,7 @@ public class OverviewTab extends ScrollableDashboardTab {
 
         y += 13;
 
-        if (APHudState.activeConditions.isEmpty()) {
+        if (DashboardProgressState.activeConditions.isEmpty()) {
             context.drawTextWithShadow(
                     textRenderer,
                     "Waiting for Archipelago slot data...",
@@ -143,7 +143,7 @@ public class OverviewTab extends ScrollableDashboardTab {
 
             y += 13;
         } else {
-            for (VictoryProgress condition : APHudState.activeConditions) {
+            for (VictoryProgress condition : DashboardProgressState.activeConditions) {
                 drawVictoryProgressRow(
                         context,
                         textRenderer,

@@ -3,7 +3,7 @@ package com.minecraftarchipelago.victory;
 /**
  * Snapshot of a single win condition's current state.
  * Used by both VictoryConditionRegistry (for checking) and
- * APHudRenderer (for display). Immutable — created fresh each tick.
+ * DashboardProgressTracker (for display). Immutable — created fresh each tick.
  */
 public record VictoryProgress(
         String  label,     // Display name: "Advancements", "Boss Kills", etc.

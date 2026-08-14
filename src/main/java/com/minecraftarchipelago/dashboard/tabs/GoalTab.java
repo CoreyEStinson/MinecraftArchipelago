@@ -8,7 +8,7 @@ import com.minecraftarchipelago.collections.ItemCollection;
 import com.minecraftarchipelago.collections.ItemCollectionRegistry;
 import com.minecraftarchipelago.dashboard.DashboardTab;
 import com.minecraftarchipelago.dashboard.ScrollableDashboardTab;
-import com.minecraftarchipelago.hud.APHudState;
+import com.minecraftarchipelago.dashboard.DashboardProgressState;
 import com.minecraftarchipelago.victory.VictoryProgress;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.font.TextRenderer;
@@ -86,8 +86,8 @@ public class GoalTab extends ScrollableDashboardTab {
 
         contentY += 18;
 
-        if (!APHudState.activeConditions.isEmpty()
-                && APHudState.activeConditions.stream().allMatch(VictoryProgress::met)) {
+        if (!DashboardProgressState.activeConditions.isEmpty()
+                && DashboardProgressState.activeConditions.stream().allMatch(VictoryProgress::met)) {
             context.fill(x, contentY, x + width, contentY + 22, COLOR_COMPLETE);
 
             context.drawTextWithShadow(
@@ -101,7 +101,7 @@ public class GoalTab extends ScrollableDashboardTab {
             contentY += 30;
         }
 
-        for (VictoryProgress condition : APHudState.activeConditions) {
+        for (VictoryProgress condition : DashboardProgressState.activeConditions) {
             if (condition.label().equals("Boss Kills") || isCollection(condition.label())) {
                 continue;
             }

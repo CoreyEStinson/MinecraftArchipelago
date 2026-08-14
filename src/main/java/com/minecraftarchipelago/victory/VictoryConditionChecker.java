@@ -17,7 +17,7 @@ public interface VictoryConditionChecker {
 
     /**
      * Returns true if this condition is active for the current game.
-     * If false, the condition is completely ignored - not shown in the HUD,
+     * If false, the condition is completely ignored - not shown in the dashboard,
      * not checked for victory
      */
     boolean isEnabled(SlotData slotData);
@@ -31,7 +31,7 @@ public interface VictoryConditionChecker {
                   SlotData slotData);
 
     /**
-     * Returns a VictoryProgress snapshot for the HUD display.
+     * Returns a VictoryProgress snapshot for dashboard display.
      * Only called when isEnabled returns true.
      */
     VictoryProgress getProgress(MinecraftServer server,

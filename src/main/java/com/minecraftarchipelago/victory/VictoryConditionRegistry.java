@@ -43,7 +43,7 @@ public class VictoryConditionRegistry {
 
     /**
      * Returns a VictoryProgress for each currently enabled condition.
-     * The list is in registration order, so the HUD renders consistently
+     * The list is in registration order, so dashboard progress renders consistently
      */
     public static List<VictoryProgress> getActiveProgress(MinecraftServer server,
                                                           CheckedLocationsState state,
