@@ -74,8 +74,8 @@ public final class ReceiptHistoryRecorder {
 
         if (progressiveGift) {
             return switch ((int) apItemId) {
-                case 43129 -> "minecraft:wooden_pickaxe";
-                case 43130 -> "minecraft:leather_chestplate";
+                case 10002 -> "minecraft:wooden_pickaxe";
+                case 10003 -> "minecraft:leather_chestplate";
                 default -> "minecraft:chest";
             };
         }
@@ -114,7 +114,7 @@ public final class ReceiptHistoryRecorder {
         }
 
         if (APItemRegistry.isProgressive(apItemId)) {
-            return apItemId == 43000L
+            return apItemId == 10000L
                     ? "minecraft:iron_pickaxe"
                     : "minecraft:iron_chestplate";
         }

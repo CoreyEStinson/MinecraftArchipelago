@@ -36,7 +36,7 @@ public class LootableCheckState extends PersistentState {
      * Assigns the next available lootable check location ID and advances
      * the internal pointer.
      * <p>
-     * Returns the location ID (e.g. 42500, 42501 …) if a slot is available.
+     * Returns the location ID (e.g. 22000, 22001 …) if a slot is available.
      * Returns -1 if all slots for this game have already been assigned
      * (the item should be marked surplus in this case).
      * <p>

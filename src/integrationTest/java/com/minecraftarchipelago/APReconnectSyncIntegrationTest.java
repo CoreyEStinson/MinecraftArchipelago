@@ -38,7 +38,7 @@ class APReconnectSyncIntegrationTest {
         when(playerManager.getPlayerList()).thenReturn(List.of());
         when(server.getAdvancementLoader()).thenReturn(advancementLoader);
         when(advancementLoader.getAdvancements()).thenReturn(List.of());
-        when(state.getAllChecked()).thenReturn(Set.of(42500L, 42501L));
+        when(state.getAllChecked()).thenReturn(Set.of(22000L, 22001L));
         when(state.isGoalAchieved()).thenReturn(true);
 
         try (MockedStatic<CheckedLocationsState> checkedStateMock = mockStatic(CheckedLocationsState.class)) {
@@ -46,7 +46,7 @@ class APReconnectSyncIntegrationTest {
 
             APEvents.resendCheckedLocationsOnConnect(server);
 
-            assertEquals(Set.of(42500L, 42501L), Set.copyOf(client.checkedLocations));
+            assertEquals(Set.of(22000L, 22001L), Set.copyOf(client.checkedLocations));
             assertEquals(List.of(CLIENT_GOAL), client.gameStates);
         }
     }

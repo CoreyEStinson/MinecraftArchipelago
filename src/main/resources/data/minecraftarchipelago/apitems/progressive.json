@@ -1,7 +1,7 @@
 {
   "progressive_items": [
     {
-      "ap_item_id": 43000,
+      "ap_item_id": 10000,
       "stages": [
         "minecraftarchipelago:tools/stone_tools",
         "minecraftarchipelago:tools/golden_tools",
@@ -11,7 +11,7 @@
       ]
     },
     {
-      "ap_item_id": 43001,
+      "ap_item_id": 10001,
       "stages": [
         "minecraftarchipelago:armor/leather_armor",
         "minecraftarchipelago:armor/golden_armor",

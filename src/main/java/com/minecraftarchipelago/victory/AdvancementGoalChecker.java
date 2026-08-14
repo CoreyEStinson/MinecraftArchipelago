@@ -6,9 +6,9 @@ import net.minecraft.server.MinecraftServer;
 
 public class AdvancementGoalChecker implements VictoryConditionChecker{
 
-    // Matches locations.py - advancements occupy IDs 42001 through 42118
-    private static final long ADV_MIN = 42001;
-    private static final long ADV_MAX_EXCL = 42119;
+    // Matches locations.py - advancements occupy IDs 20000 through 20116
+    private static final long ADV_MIN = 20000;
+    private static final long ADV_MAX_EXCL = 20117;
     private static final int TOTAL_ADVANCEMENTS = 117;
 
     @Override

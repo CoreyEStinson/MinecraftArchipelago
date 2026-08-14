@@ -1,7 +1,7 @@
 {
   "progressive_gifts": [
     {
-      "ap_item_id": 43129,
+      "ap_item_id": 10002,
       "packages": [
         "minecraftarchipelago:progressive_gifts/tools_wooden",
         "minecraftarchipelago:progressive_gifts/tools_stone",
@@ -12,7 +12,7 @@
       ]
     },
     {
-      "ap_item_id": 43130,
+      "ap_item_id": 10003,
       "packages": [
         "minecraftarchipelago:progressive_gifts/armor_leather",
         "minecraftarchipelago:progressive_gifts/armor_golden",

@@ -1,8 +1,8 @@
 {
   "boss_kills": [
-    { "entity": "minecraft:ender_dragon", "ap_location_id": 42119 },
-    { "entity": "minecraft:wither",       "ap_location_id": 42120 },
-    { "entity": "minecraft:elder_guardian","ap_location_id": 42121 },
-    { "entity": "minecraft:warden",       "ap_location_id": 42122 }
+    { "entity": "minecraft:ender_dragon", "ap_location_id": 21000 },
+    { "entity": "minecraft:wither",       "ap_location_id": 21001 },
+    { "entity": "minecraft:elder_guardian","ap_location_id": 21002 },
+    { "entity": "minecraft:warden",       "ap_location_id": 21003 }
   ]
 }

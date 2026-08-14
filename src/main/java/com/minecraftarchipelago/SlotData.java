@@ -4,16 +4,16 @@ import java.util.*;
 
 public final class SlotData {
 
-    public static final long LOOTABLE_CHECK_BASE_ID = 42500;
-    public static final int LOOTABLE_CHECK_MAX = 41;
+    public static final long LOOTABLE_CHECK_BASE_ID = 22000;
+    public static final int LOOTABLE_CHECK_MAX = 50;
 
     // Boss Name -> AP Location ID Mapping
     // Single source for all boss-related lookups
     public static final Map<String, Long> BOSS_LOCATION_IDS = Map.of(
-            "ender_dragon",   42119L,
-            "wither",         42120L,
-            "elder_guardian", 42121L,
-            "warden",         42122L
+            "ender_dragon",   21000L,
+            "wither",         21001L,
+            "elder_guardian", 21002L,
+            "warden",         21003L
     );
 
     //  --- Fields ---
@@ -77,7 +77,7 @@ public final class SlotData {
 
     /**
      * Returns the AP location ID for the named boss kill, or -1 if unknown.
-     * Example: getBossLocationId("wither") → 42114
+     * Example: getBossLocationId("wither") → 21001
      */
     public static long getBossLocationId(String bossName) {
         return BOSS_LOCATION_IDS.getOrDefault(bossName, -1L);
