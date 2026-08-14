@@ -21,7 +21,7 @@
     - [Lootable Checks](#lootable-checks)
     - [Item Collections](#item-collections)
 - [Win Conditions](#win-conditions)
-- [HUD Guide](#hud-guide)
+- [Dashboard](#dashboard)
 - [Commands](#commands)
 - [Known Limitations](#known-limitations)
 - [Troubleshooting](#troubleshooting)
@@ -111,7 +111,7 @@ Minecraft Archipelago:
   death_link: false              # true/false, default false
 
   # How many Archipelago Loot items are hidden in structure chests.
-  lootable_checks: 20            # 0–42, default 20
+  lootable_checks: 20            # 0–50, default 20
 
   # Which bosses must be killed to satisfy the boss kill win condition.
   # Leave empty to disable. Valid values: ender_dragon, wither,
@@ -122,7 +122,7 @@ Minecraft Archipelago:
 
   # How many lootable checks must be claimed to win (0 = disabled).
   # Cannot exceed lootable_checks.
-  required_lootable_checks: 0    # 0–42, default 0
+  required_lootable_checks: 0    # 0–50, default 0
 
   # Which item collection sets must be fully completed to win.
   # Leave empty to disable. Valid values listed below.
@@ -151,7 +151,10 @@ Generate your game from the Archipelago Launcher
 
 1. Create or load a **singleplayer world** in Minecraft 1.21.1.
 2. Start the Archipelago server with your generated game.
-3. Connect using the chat command:
+3. Press **`H`** to open the Archipelago Dashboard.
+4. Enter the server address, port, slot name, and optional password, then select **Connect**.
+
+You can also connect using the chat command:
 
 ```
 /archipelago join <host> <port> <slotname> [password]
@@ -182,14 +185,12 @@ To check connection status:
 
 When you load into a world, almost everything is locked. Items from your inventory will not function until unlocked by receiving the corresponding item from the Archipelago server. This includes:
 
-- **Tools** — Stone through Netherite (4 progressive tiers)
-- **Armor** — Leather through Netherite (4 progressive tiers)
+- **Tools** — Stone through Netherite (5 progressive tiers)
+- **Armor** — Leather through Netherite (6 progressive tiers)
 - **Weapons** — Bow, Crossbow, Trident, Mace, Shield
 - **Utility items** — Buckets, Potions, Elytra, Shears, Flint and Steel, and more
 - **Craftable blocks** — Furnace, Anvil, Brewing Stand, Ender Chest, Smithing Table, and more
 - **Gamerule changes** — Keep Inventory, Raids, Wandering Traders, etc.
-
-> Wooden tools and crafting are always available.
 
 ### Location Types
 
@@ -199,17 +200,32 @@ There are three types of checks in the location pool:
 |-----------------|-------|-------------------------------------------------------------|
 | Advancements    | 117   | Complete any vanilla advancement                            |
 | Boss Kills      | 4     | Kill the Ender Dragon, Wither, Elder Guardian, or Warden    |
-| Lootable Checks | 0–42  | Find and claim Archipelago Loot items from structure chests |
+| Lootable Checks | 0–50  | Find and claim Archipelago Loot items from structure chests |
 
 ### Lootable Checks
 
-Structure chests have a 30% chance to contain an **Archipelago Loot** item. When you find one:
+Archipelago Loot can appear from the following sources. Each listed chance is rolled separately when that source produces loot, a trade offer, or a mob drop.
+
+| Source | Chance | Includes |
+|---|---:|---|
+| Structure Chests | 33% | Village chests, dungeons, mineshafts, ancient cities, buried treasure, temples, shipwrecks, strongholds, bastions, fortresses, and end cities. |
+| Common Mob Drops | 2% | Zombies, skeletons, spiders, creepers, slimes, pillagers, hoglins, and related variants. |
+| Uncommon Mob Drops | 6% | Guardians, blazes, witches, vindicators, vexes, shulkers, ghasts, piglin brutes, zoglins, wither skeletons, breezes, and phantoms. |
+| Rare Mob Drops | 10% | Elder guardians, wardens, ravagers, evokers, and withers. |
+| Ender Dragon | 100% | The dragon always drops an Archipelago Loot item. |
+| Fishing | 10% | Fishing loot. |
+| Piglin Bartering | 3% | Piglin bartering loot. |
+| Trial Chamber Vault | 20% | Trial Chamber reward vaults. |
+| Ominous Vault | 35% | Ominous Trial Chamber vaults. |
+| Villager Expert Trade | 25% | Level 4 villager trade offers. |
+| Villager Master Trade | 50% | Level 5 villager trade offers. |
+| Archaeology | 20% | Suspicious sand and gravel loot from desert wells, desert pyramids, trail ruins, and ocean ruins. |
+
+When you find an **Archipelago Loot** item:
 
 1. Pick it up. It will be assigned a check number automatically.
 2. The item shows what's in store once the AP server is scouted.
 3. **Right-click** the item in your inventory to claim it and send the check.
-
-Lootable items are found in dungeons, villages, mineshafts, bastions, end cities, and many other structures.
 
 ### Item Collections
 
@@ -234,28 +250,20 @@ When all conditions are met, a victory message is broadcast and the goal is sent
 
 ---
 
-## HUD Guide
+## Dashboard
 
-The mod includes two draggable overlay panels.
+Press **`H`** in-game to open the Archipelago Dashboard. Before connecting, it provides a connection form for the server address, port, slot name, and optional password. Once connected, the Dashboard also includes a **Disconnect** button.
 
-### Main HUD — toggle with `H`
-
-Displays real-time game state:
-
-| Section | Shows |
+| Tab | Shows |
 |---|---|
-| Connection | Server address, slot name, connected / disconnected |
-| Advancements | Checked / total with progress bar and goal marker |
-| Boss Kills | Each boss with ✓ killed / ✦ required / ○ optional |
-| Lootable Checks | Found / total with progress bar *(hidden if lootable_checks = 0)* |
-| Equipment | Current armor and tool tier |
+| **Overview** | Connection details, overall check progress, active victory conditions, and recent gifts and unlocks. |
+| **Goals** | Required advancement, boss, lootable, and collection goals. Collection entries can be expanded to show the required items. |
+| **Progress** | Advancement progress by category, including completion state and logic requirements for unchecked advancements. |
+| **Unlocks** | Received progression and utility unlock items. |
+| **Items** | Received physical gift items and their quantities. |
+| **Settings** | Dashboard display preferences, including completed advancement visibility, advancement descriptions, the DeathLink status strip, and recent activity count. |
 
-### Win Conditions Panel — toggle with `G`
-
-Shows each active win condition with its own progress bar. When a condition is met, its bar turns gold.
-
-- Press **`V`** while the panel is open to expand collection details, listing every item still needed.
-- **Alt+drag** either panel to reposition it. Positions are saved between sessions.
+Dashboard preferences are saved automatically in the Minecraft config folder.
 
 ---
 
@@ -292,8 +300,8 @@ Pick up the item after connecting. Once connected, the item will be assigned a c
 **I can't use my furnace / brewing stand / anvil.**  
 These blocks are locked until you receive the corresponding unlock item (Furnace, Brewing Stand, Anvil) from the Archipelago server.
 
-**Win condition panel shows "No active win conditions."**  
-The mod hasn't received slot data yet. Connect to your Archipelago server first.
+**The Dashboard is waiting for Archipelago slot data.**
+Connect to your Archipelago server first. The required goals and progress sections populate after slot data is received.
 
 ---
 
