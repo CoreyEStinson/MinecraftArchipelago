@@ -3,6 +3,7 @@ package com.minecraftarchipelago.dashboard;
 import com.minecraftarchipelago.APSession;
 import com.minecraftarchipelago.apitems.APGiveItemRegistry;
 import com.minecraftarchipelago.apitems.APItemRegistry;
+import com.minecraftarchipelago.apitems.APProgressiveGiftRegistry;
 import io.github.archipelagomw.parts.NetworkItem;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.Identifier;
@@ -18,7 +19,11 @@ public final class ReceiptHistoryRecorder {
             String sender
     ) {
         APGiveItemRegistry.GiveEntry gift = APGiveItemRegistry.getEntry(apItemId);
-        ReceiptKind kind = gift == null ? ReceiptKind.UNLOCK : ReceiptKind.GIFT;
+        boolean progressiveGift = APProgressiveGiftRegistry.isProgressiveGift(apItemId);
+
+        ReceiptKind kind = (gift != null || progressiveGift)
+                ? ReceiptKind.GIFT
+                : ReceiptKind.UNLOCK;
 
         String slotName = APSession.slotName == null ? "" : APSession.slotName;
         String safeName = displayName == null || displayName.isBlank()
@@ -31,7 +36,7 @@ public final class ReceiptHistoryRecorder {
                 receiptIndex,
                 kind,
                 safeName,
-                gift == null ? getUnlockIcon(apItemId) : gift.itemId().toString(),
+                getReceiptIcon(apItemId, gift, progressiveGift),
                 gift == null ? 1 : gift.count(),
                 safeSender
         ));
@@ -56,6 +61,26 @@ public final class ReceiptHistoryRecorder {
                     item.playerName
             );
         }
+    }
+
+    private static String getReceiptIcon(
+            long apItemId,
+            APGiveItemRegistry.GiveEntry gift,
+            boolean progressiveGift
+    ) {
+        if (gift != null) {
+            return gift.itemId().toString();
+        }
+
+        if (progressiveGift) {
+            return switch ((int) apItemId) {
+                case 43129 -> "minecraft:wooden_pickaxe";
+                case 43130 -> "minecraft:leather_chestplate";
+                default -> "minecraft:chest";
+            };
+        }
+
+        return getUnlockIcon(apItemId);
     }
 
     private static String getUnlockIcon(long apItemId) {

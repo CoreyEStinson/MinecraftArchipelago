@@ -1,0 +1,11 @@
+{
+  "items": {
+    "lock": [],
+    "unlock": [
+      "minecraft:golden_pickaxe", "minecraft:golden_sword",
+      "minecraft:golden_axe",     "minecraft:golden_shovel", "minecraft:golden_hoe"
+    ]
+  },
+  "world":  { "gamerules": {} },
+  "grants": { "packages": [] }
+}

@@ -1,0 +1,11 @@
+{
+  "items": {
+    "lock": [],
+    "unlock": [
+      "minecraft:golden_helmet", "minecraft:golden_chestplate",
+      "minecraft:golden_leggings",     "minecraft:golden_boots"
+    ]
+  },
+  "world":  { "gamerules": {} },
+  "grants": { "packages": [] }
+}

@@ -1,0 +1,8 @@
+{
+  "items": [
+    { "id": "minecraft:diamond_helmet", "count": 1 },
+    { "id": "minecraft:diamond_chestplate", "count": 1 },
+    { "id": "minecraft:diamond_leggings", "count": 1 },
+    { "id": "minecraft:diamond_boots", "count": 1 }
+  ]
+}

@@ -1,0 +1,8 @@
+{
+  "items": [
+    { "id": "minecraft:golden_helmet", "count": 1 },
+    { "id": "minecraft:golden_chestplate", "count": 1 },
+    { "id": "minecraft:golden_leggings", "count": 1 },
+    { "id": "minecraft:golden_boots", "count": 1 }
+  ]
+}

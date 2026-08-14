@@ -23,9 +23,11 @@ public class APItemsReloadListener implements SimpleSynchronousResourceReloadLis
     public void reload(ResourceManager manager) {
         APItemRegistry.clear();
         APGiveItemRegistry.clear();
+        APProgressiveGiftRegistry.clear();
 
         loadStages(manager);
         loadProgressives(manager);
+        loadProgressiveGifts(manager);
         loadGiveItems(manager);
 
         MinecraftArchipelago.LOGGER.info(
@@ -72,6 +74,27 @@ public class APItemsReloadListener implements SimpleSynchronousResourceReloadLis
                 Identifier itemId = Identifier.tryParse(obj.get("minecraft_item").getAsString());
                 int count = obj.has("count") ? obj.get("count").getAsInt() : 1;
                 if (itemId != null && count > 0) APGiveItemRegistry.put(id, itemId, count);
+            }
+        });
+    }
+
+    private static void loadProgressiveGifts(ResourceManager manager) {
+        load(manager, "apitems/progressive_gifts.json", root -> {
+            for (JsonElement element : root.getAsJsonArray("progressive_gifts")) {
+                JsonObject object = element.getAsJsonObject();
+                long apItemId = object.get("ap_item_id").getAsLong();
+
+                List<Identifier> packageIds = new ArrayList<>();
+                for (JsonElement packageElement : object.getAsJsonArray("packages")) {
+                    Identifier packageId = Identifier.tryParse(packageElement.getAsString());
+                    if (packageId != null) {
+                        packageIds.add(packageId);
+                    }
+                }
+
+                if (!packageIds.isEmpty()) {
+                    APProgressiveGiftRegistry.put(apItemId, packageIds);
+                }
             }
         });
     }

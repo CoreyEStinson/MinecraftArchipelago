@@ -1,0 +1,8 @@
+{
+  "items": [
+    { "id": "minecraft:chainmail_helmet", "count": 1 },
+    { "id": "minecraft:chainmail_chestplate", "count": 1 },
+    { "id": "minecraft:chainmail_leggings", "count": 1 },
+    { "id": "minecraft:chainmail_boots", "count": 1 }
+  ]
+}

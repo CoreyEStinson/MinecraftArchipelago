@@ -1,0 +1,26 @@
+{
+  "progressive_gifts": [
+    {
+      "ap_item_id": 43129,
+      "packages": [
+        "minecraftarchipelago:progressive_gifts/tools_wooden",
+        "minecraftarchipelago:progressive_gifts/tools_stone",
+        "minecraftarchipelago:progressive_gifts/tools_golden",
+        "minecraftarchipelago:progressive_gifts/tools_iron",
+        "minecraftarchipelago:progressive_gifts/tools_diamond",
+        "minecraftarchipelago:progressive_gifts/tools_netherite"
+      ]
+    },
+    {
+      "ap_item_id": 43130,
+      "packages": [
+        "minecraftarchipelago:progressive_gifts/armor_leather",
+        "minecraftarchipelago:progressive_gifts/armor_golden",
+        "minecraftarchipelago:progressive_gifts/armor_chainmail",
+        "minecraftarchipelago:progressive_gifts/armor_iron",
+        "minecraftarchipelago:progressive_gifts/armor_diamond",
+        "minecraftarchipelago:progressive_gifts/armor_netherite"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,8 @@
+{
+  "items": [
+    { "id": "minecraft:diamond_pickaxe", "count": 1 },
+    { "id": "minecraft:diamond_sword", "count": 1 },
+    { "id": "minecraft:diamond_axe", "count": 1 },
+    { "id": "minecraft:diamond_shovel", "count": 1 }
+  ]
+}

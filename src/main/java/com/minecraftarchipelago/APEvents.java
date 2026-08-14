@@ -2,6 +2,8 @@ package com.minecraftarchipelago;
 
 import com.minecraftarchipelago.apitems.APGiveItemRegistry;
 import com.minecraftarchipelago.apitems.APItemRegistry;
+import com.minecraftarchipelago.apitems.APProgressiveGiftRegistry;
+import com.minecraftarchipelago.apitems.state.ProgressiveGiftState;
 import com.minecraftarchipelago.aplocations.CheckedLocationsState;
 import com.minecraftarchipelago.aplocations.VictoryCondition;
 import com.minecraftarchipelago.apstages.service.StageUnlockApplier;
@@ -222,6 +224,42 @@ public class APEvents {
             return;
         }
 
+        if (decision.progressiveGift()) {
+            ProgressiveGiftState giftState = ProgressiveGiftState.get(server);
+
+            int tierIndex = giftState.getNextTier(
+                    serverPlayer.getUuid(),
+                    apItemId,
+                    APProgressiveGiftRegistry.tierCount(apItemId)
+            );
+
+            Identifier packageId = APProgressiveGiftRegistry.getPackageForTier(apItemId, tierIndex);
+
+            if (packageId == null) {
+                MinecraftArchipelago.LOGGER.warn(
+                        "[AP] No progressive gift package remains for item ID {}",
+                        apItemId
+                );
+                return;
+            }
+
+            if (StageUnlockApplier.grantPackage(serverPlayer, packageId)) {
+                giftState.markTierGranted(
+                        serverPlayer.getUuid(),
+                        apItemId,
+                        tierIndex
+                );
+            } else {
+                MinecraftArchipelago.LOGGER.error(
+                        "[AP] Missing progressive gift package {} for item {}",
+                        packageId,
+                        apItemId
+                );
+            }
+
+            return;
+        }
+
         if (decision.stageId() != null) {
             StageUnlockState state = StageUnlockState.get(server);
             if (state.unlock(serverPlayer.getUuid(), decision.stageId())) {
@@ -237,23 +275,27 @@ public class APEvents {
                                                    int itemIndex) {
         CheckedLocationsState checkedState = CheckedLocationsState.get(server);
         if (!checkedState.isNewItem(itemIndex)) {
-            return new ReceivedItemDecision(true, null, null);
+            return new ReceivedItemDecision(true, null, null, false);
         }
 
         if (APGiveItemRegistry.isGiveItem(apItemId)) {
-            return new ReceivedItemDecision(false, APGiveItemRegistry.getEntry(apItemId), null);
+            return new ReceivedItemDecision(false, APGiveItemRegistry.getEntry(apItemId), null, false);
+        }
+
+        if (APProgressiveGiftRegistry.isProgressiveGift(apItemId)) {
+            return new ReceivedItemDecision(false, null, null, true);
         }
 
         if (APItemRegistry.isProgressive(apItemId)) {
             StageUnlockState state = StageUnlockState.get(server);
             Identifier stageId = APItemRegistry.getNextTier(apItemId, state.getUnlocked(playerId));
             MinecraftArchipelago.LOGGER.info("[AP] -> progressive item found");
-            return new ReceivedItemDecision(false, null, stageId);
+            return new ReceivedItemDecision(false, null, stageId, false);
         }
 
         Identifier stageId = APItemRegistry.getStageId(apItemId);
         MinecraftArchipelago.LOGGER.info("[AP] -> stage lookup result: {}", stageId);
-        return new ReceivedItemDecision(false, null, stageId);
+        return new ReceivedItemDecision(false, null, stageId, false);
     }
 
     static void resendCheckedLocationsOnConnect(MinecraftServer server) {
@@ -290,6 +332,7 @@ public class APEvents {
 
     record ReceivedItemDecision(boolean duplicate,
                                 APGiveItemRegistry.GiveEntry giveEntry,
-                                Identifier stageId) {
+                                Identifier stageId,
+                                boolean progressiveGift) {
     }
 }

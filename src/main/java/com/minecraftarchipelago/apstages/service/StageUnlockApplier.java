@@ -61,6 +61,24 @@ public class StageUnlockApplier
         }
     }
 
+    public static boolean grantPackage(ServerPlayerEntity player, Identifier packageId) {
+        PackageDef pack = StageRegistry.getPackage(packageId);
+        if (pack == null) {
+            return false;
+        }
+
+        grantSinglePackage(player, packageId, pack);
+
+        player.playSoundToPlayer(
+                SoundEvents.ENTITY_EXPERIENCE_ORB_PICKUP,
+                SoundCategory.PLAYERS,
+                1.0f,
+                1.0f
+        );
+
+        return true;
+    }
+
     private  static void grantSinglePackage(ServerPlayerEntity player, Identifier packageID, PackageDef pack){
         for (ItemGrant entry : pack.items()) {
             giveItem(player, entry);

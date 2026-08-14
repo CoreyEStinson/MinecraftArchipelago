@@ -1,0 +1,11 @@
+{
+  "items": {
+    "lock": [],
+    "unlock": [
+      "minecraft:chainmail_helmet", "minecraft:chainmail_chestplate",
+      "minecraft:chainmail_leggings",     "minecraft:chainmail_boots"
+    ]
+  },
+  "world":  { "gamerules": {} },
+  "grants": { "packages": [] }
+}

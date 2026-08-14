@@ -1,0 +1,8 @@
+{
+  "items": [
+    { "id": "minecraft:netherite_pickaxe", "count": 1 },
+    { "id": "minecraft:netherite_sword", "count": 1 },
+    { "id": "minecraft:netherite_axe", "count": 1 },
+    { "id": "minecraft:netherite_shovel", "count": 1 }
+  ]
+}
